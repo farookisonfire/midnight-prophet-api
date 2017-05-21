@@ -1,0 +1,27 @@
+{
+  "name": "midnight-prophet-api",
+  "version": "1.0.0",
+  "description": "API for OHS admissions related apps (Pulse/Ubuntu).",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farookkhan/midnight-prophet-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/farookkhan/midnight-prophet-api/issues"
+  },
+  "homepage": "https://github.com/farookkhan/midnight-prophet-api#readme",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.3",
+    "express": "^4.15.3",
+    "mongodb": "^2.2.26",
+    "node-fetch": "^1.6.3"
+  }
+}
