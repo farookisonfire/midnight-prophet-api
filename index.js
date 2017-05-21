@@ -2,7 +2,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var createApp = require('./server/express');
 
-const MONGODB_URI = MONGODB_URI || 'mongodb://localhost:27017/ohs';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ohs';
 const PORT = process.env.PORT || 1337;
 
 MongoClient.connect(MONGODB_URI, (err, db) => {
