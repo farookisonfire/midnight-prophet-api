@@ -1,0 +1,6 @@
+{
+  "name": "midnight-prohpet-api",
+  "description": "API for OHS admissions related apps (Pulse/Ubuntu).",
+  "repository" : "https://github.com/farookkhan/midnight-prophet-api",
+  "keywords" : ["node", "express", "static"]
+}
