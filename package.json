@@ -23,5 +23,8 @@
     "express": "^4.15.3",
     "mongodb": "^2.2.26",
     "node-fetch": "^1.6.3"
+  },
+   "engines": {
+    "node": "6.11.1"
   }
 }
