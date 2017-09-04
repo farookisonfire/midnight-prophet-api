@@ -10,7 +10,7 @@ module.exports = function createApp(db) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use('/api/applicants', routes(db));
-  app.use('/donate', donationRoutes())
+  app.use('/donation', donationRoutes())
   app.use((err, req, res, next) => {
     res.status(500).send("500 Internal server error");
   });
