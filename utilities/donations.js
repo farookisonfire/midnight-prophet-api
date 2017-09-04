@@ -14,7 +14,7 @@ function handleCharge(req, res){
   
   .then(function(customer) {
     // YOUR CODE: Save the customer ID and other info in a database for later.
-    console.log('THEN ------- CUSTOMER INFO --------', customer)
+    console.log('------- CUSTOMER INFO --------', customer)
     console.log('here is the customers id to be saved in databse', customer.id)
 
     return stripe.charges.create({
@@ -25,7 +25,7 @@ function handleCharge(req, res){
   })
 
   .then(function(charge) {
-    console.log('THEN -----CHARGE INFO------', charge)
+    console.log('-----CHARGE INFO------', charge)
     res.status(200).send({payment: 'Your donation of ' + customerDetails.amount + ' has been successful!'})
   });
 }
