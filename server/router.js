@@ -1,10 +1,14 @@
 var Router = require('express').Router;
 var fetch = require('node-fetch');
 var mapAnswersToQuestions = require('../utilities/typeform');
-var createSlackText = require('../utilities/slack');
+var updateSlack = require('../utilities/slack');
 
 const ObjectId = require('mongodb').ObjectID;
 const COLLECTION = process.env.COLLECTION || 'v2Collection';
+
+const Mailchimp = require('mailchimp-api-v3');
+const mailchimp = new Mailchimp(process.env.MAILCHIMP_KEY || '23f25152f40bbd591f91a9852a2c33a4-us14');
+
 const lists = {
   test: 'b5972e3719',
   denied: 'b5605e65e2',
@@ -33,33 +37,65 @@ module.exports = function routes(db) {
     const formResponse = mapAnswersToQuestions(questions, answers, status);
 
     storeApplicant(myCollection, formResponse)
-
-    fetch('https://hooks.slack.com/services/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', { 
-      method: 'POST',
-      headers: {"Content-Type": "application/json"},
-      body: createSlackText(formResponse)
-     })
-     .then(response => {
-       if (!response.ok) { throw Error(response.statusText); }
-       console.log('ok')
-     })
-     .catch(err => console.log(err));  
-
-     res.status(200).json(req.body);
+    .then(updateSlack(formResponse))
+    .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
+    .catch((err) => res.status(500).send(err));
   });
 
-  router.put('/:id/:status', function(req,res) {
-    const id = req.params.id;
-    const status = req.params.status
-    myCollection.update(
-      {_id: ObjectId(id)}, 
-      {$set:{status: status}}, 
-      (err, result) => {
-        if (err) { return console.log(err); }
-        console.log('update successful');
-        console.log('~~~~~~~status~~~~~~', result);
-        res.status(200).json(result);
-    });
+  // APPLICAT IS PROMOTED TO SECONDARY OR DENIED
+  router.put('/:id', function(req,res) {
+    const {
+      id = '',
+      email = '',
+      firstName = '',
+      lastName = '',
+      status = '',
+      program = '',
+    } = req.body;
+
+    const dbPayload = program ?
+      {status: status, secondary: program} :
+      {status: status};
+
+      console.log('DB PAYLOAD', dbPayload)
+
+    const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id);
+    const listId = resolveListId(status, program);
+    
+    updateApplicant(myCollection, dbPayload, id)
+    //TODO: do not add record to db if the subsequent step - add to MailChimp fails. 
+    //Also, inform the client that the update was unsuccessful s
+      .then(() => addToMailList(res, mailClientPayload, listId))
+      .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
+  });
+
+   // APPLICANT SUBMITS PART 2 APP (WEBHOOK)
+  router.post('/secondary/:program', (req, res) => {
+    const secondaryProgram = req.params.program || '';
+    const questions = req.body.form_response.definition.fields || [];
+    const answers = req.body.form_response.answers || [];
+    const id = req.body.form_response.hidden.dbid || '';
+    const status = 'secondary';
+
+    // validate the database id
+    const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+    const isValidId = checkForHexRegExp.test(id);
+
+    console.log('THE ID', id)
+
+    if (isValidId) {
+      const formResponse = mapAnswersToQuestions(questions, answers, status, secondaryProgram);
+    console.log('THE FORM RESPONSE', formResponse)
+      updateApplicant(myCollection, formResponse, id)
+        .then(() => res.status(200).send('Applicant update with secondary data successful.'))
+        .catch(err => {
+          console.log('catch', err)
+          res.status(500).send('Error, unable to update applicant with secondary.')
+        });
+
+    } else {
+      res.status(500).send('Invalid UserId');
+    }
   });
 
   return router;
@@ -75,4 +111,66 @@ function storeApplicant(collection, formResponse) {
       resolve(inserted);
     })
   })
+}
+
+function updateApplicant(collection, dbPayload, id) {
+  return new Promise((resolve, reject) => {
+    collection.update(
+      {_id: ObjectId(id)},
+      {$set: dbPayload},
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          reject();
+        }
+        resolve(result);
+    })
+  })
+}
+
+function resolveMailClientPayload(email, firstName, lastName, id) {
+  const payload = {
+    "email_address": email,
+    "status": "subscribed",
+    "merge_fields": {
+      "FNAME": firstName,
+      "LNAME": lastName,
+      "DBID": id,
+    }
+  };
+  return payload;
+}
+
+function resolveListId(status, program) {
+  if (status === 'denied') {
+    return lists.denied;
+  }
+
+  if (status === 'secondary' && program) {
+    switch(program) {
+      case 'healthInnovation':
+        return lists.secondaryHealth;
+      case 'education':
+        return lists.secondaryEducation;
+      case 'Impact':
+        return lists.secondaryImpact;
+      default:
+        return;
+    }
+  }
+  return;
+}
+
+function addToMailList(res, mailPayload, listId) {
+  mailchimp.post({
+    path: `lists/${listId}/members`,
+    body: mailPayload,
+  }, function(err, result){
+    if (err) {
+      console.log(err);
+      return res.status(500).send('unable to add new list member.');
+    }
+    console.log('MAILCHIMP RESULT:', result);
+    res.status(200).send('User added to list successfully.');
+  });
 }
