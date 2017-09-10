@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-var MongoClient = require('mongodb').MongoClient;
-var createApp = require('./server/express');
+const MongoClient = require('mongodb').MongoClient;
+const createApp = require('./server/express');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ohs';
 const PORT = process.env.PORT || 1337;
