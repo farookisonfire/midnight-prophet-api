@@ -7,13 +7,13 @@ const ObjectId = require('mongodb').ObjectID;
 const COLLECTION = process.env.COLLECTION || 'v2Collection';
 
 const Mailchimp = require('mailchimp-api-v3');
-const mailchimp = new Mailchimp(process.env.MAILCHIMP_KEY || '23f25152f40bbd591f91a9852a2c33a4-us14');
+const mailchimp = new Mailchimp(process.env.MAILCHIMP_KEY);
 
 const lists = {
   test: 'b5972e3719',
   denied: 'b5605e65e2',
   secondaryHealth: 'e5b5eaa47c',
-  secondaryEducation: '6d961a792a',
+  secondaryServe: '6d961a792a',
   secondaryImpact: '5c163c3011',
 };
 
@@ -150,8 +150,8 @@ function resolveListId(status, program) {
     switch(program) {
       case 'healthInnovation':
         return lists.secondaryHealth;
-      case 'education':
-        return lists.secondaryEducation;
+      case 'serve':
+        return lists.secondaryServe;
       case 'Impact':
         return lists.secondaryImpact;
       default:
