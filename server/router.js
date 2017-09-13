@@ -4,7 +4,6 @@ const mapAnswersToQuestions = require('../utilities/typeform');
 const updateSlack = require('../utilities/slack');
 const ObjectId = require('mongodb').ObjectID;
 const moment = require('moment');
-moment().format();
 
 const COLLECTION = process.env.COLLECTION || 'v2Collection';
 const Mailchimp = require('mailchimp-api-v3');
@@ -84,7 +83,7 @@ module.exports = function routes(db) {
       hidden = {},
       submitted_at = moment().format('MM-DD-YYYY'),
     } = form_response;
-    
+
     const questions = definition.fields || [];
     const id = hidden.dbid || '';
     const status = 'secondary';
