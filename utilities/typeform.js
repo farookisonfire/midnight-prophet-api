@@ -14,8 +14,11 @@ const OPINION_SCALE = "opinion_scale";
 const YES_NO = "yes_no";
 const LEGAL = "legal";
 
-function mapAnswersToQuestions(questions, answers, status, program) {
+function mapAnswersToQuestions(date, questions, answers, status, program) {
   const map = {};
+  status === 'secondary' ?
+    map.secondarySubmitDate = date :
+    map.primarySubmitDate = date;
   map.status = status;
   if (program) {
     map.secondaryProgram = program;

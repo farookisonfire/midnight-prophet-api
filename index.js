@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+process.env.NODE_ENV !== 'production' && require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const createApp = require('./server/express');
 

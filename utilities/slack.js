@@ -9,7 +9,7 @@ function createSlackText(formResponse) {
 
 function updateSlack(formResponse) {
   return new Promise((resolve, reject) => {
-    fetch(SLACK_URL, { 
+    fetch(SLACK_URL, {
         method: 'POST',
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: createSlackText(formResponse)

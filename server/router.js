@@ -1,11 +1,12 @@
-var Router = require('express').Router;
-var fetch = require('node-fetch');
-var mapAnswersToQuestions = require('../utilities/typeform');
-var updateSlack = require('../utilities/slack');
-
+const Router = require('express').Router;
+const fetch = require('node-fetch');
+const mapAnswersToQuestions = require('../utilities/typeform');
+const updateSlack = require('../utilities/slack');
 const ObjectId = require('mongodb').ObjectID;
-const COLLECTION = process.env.COLLECTION || 'v2Collection';
+const moment = require('moment');
+moment().format();
 
+const COLLECTION = process.env.COLLECTION || 'v2Collection';
 const Mailchimp = require('mailchimp-api-v3');
 const mailchimp = new Mailchimp(process.env.MAILCHIMP_KEY);
 
@@ -31,10 +32,16 @@ module.exports = function routes(db) {
 
   // APPLICANT SUBMITS PART 1 APP (WEBHOOK)
   router.post('/', function(req, res) {
-    const questions = req.body.form_response.definition.fields;
-    const answers = req.body.form_response.answers;
+    const { form_response = {} } = req.body;
+    const {
+      definition = {},
+      answers = [],
+      submitted_at = moment().format('MM-DD-YYYY'),
+    } = form_response;
+    const questions = definition.fields || [];
     const status = 'applied';
-    const formResponse = mapAnswersToQuestions(questions, answers, status);
+    const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
+    const formResponse = mapAnswersToQuestions(submitDate, questions, answers, status);
 
     storeApplicant(myCollection, formResponse)
     .then(updateSlack(formResponse))
@@ -57,8 +64,6 @@ module.exports = function routes(db) {
       {status: status, secondary: program} :
       {status: status};
 
-      console.log('DB PAYLOAD', dbPayload)
-
     const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id);
     const listId = resolveListId(status, program);
     
@@ -72,20 +77,25 @@ module.exports = function routes(db) {
    // APPLICANT SUBMITS PART 2 APP (WEBHOOK)
   router.post('/secondary/:program', (req, res) => {
     const secondaryProgram = req.params.program || '';
-    const questions = req.body.form_response.definition.fields || [];
-    const answers = req.body.form_response.answers || [];
-    const id = req.body.form_response.hidden.dbid || '';
+    const { form_response = {} } = req.body;
+    const {
+      definition = {},
+      answers = [],
+      hidden = {},
+      submitted_at = moment().format('MM-DD-YYYY'),
+    } = form_response;
+    
+    const questions = definition.fields || [];
+    const id = hidden.dbid || '';
     const status = 'secondary';
+    const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
 
     // validate the database id
     const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
     const isValidId = checkForHexRegExp.test(id);
 
-    console.log('THE ID', id)
-
     if (isValidId) {
-      const formResponse = mapAnswersToQuestions(questions, answers, status, secondaryProgram);
-    console.log('THE FORM RESPONSE', formResponse)
+      const formResponse = mapAnswersToQuestions(submitDate, questions, answers, status, secondaryProgram);
       updateApplicant(myCollection, formResponse, id)
         .then(() => res.status(200).send('Applicant update with secondary data successful.'))
         .catch(err => {
