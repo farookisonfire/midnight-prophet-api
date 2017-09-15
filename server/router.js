@@ -42,8 +42,9 @@ module.exports = function routes(db) {
     const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
     const formResponse = mapAnswersToQuestions(submitDate, questions, answers, status);
 
+    // .then(updateSlack(formResponse))
+
     storeApplicant(myCollection, formResponse)
-    .then(updateSlack(formResponse))
     .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
     .catch((err) => res.status(500).send(err));
   });
