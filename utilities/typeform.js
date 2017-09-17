@@ -25,14 +25,14 @@ function mapAnswersToQuestions(typeformPayload) {
   } = typeformPayload
 
   const map = {};
-  
+
   map.refcode = refcode;
   map.status = status;
-  map.secondaryProgram = secondaryProgram ? secondaryProgram : '';
+  map.secondaryProgram = secondaryProgram;
   status === 'secondary' ?
     map.secondarySubmitDate = submitDate :
     map.primarySubmitDate = submitDate;
-  
+
   questions.map(question => {
     answers.map(answer => {
       if(question.id === answer.field.id) {
