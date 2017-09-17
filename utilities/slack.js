@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const fetch = require('node-fetch');
-const SLACK_URL = process.env.SLACK_URL || 'https://hooks.slack.com/services/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';
+const SLACK_URL = process.env.SLACK_URL || '';
 
 function createSlackText(formResponse) {
   const slackString = `*________ New Applicant Details: ________*\nFirst Name: ${formResponse["First Name"]}\nLast Name: ${formResponse["Last Name"]}\nUniversity: ${formResponse["University you attend(ed)"]}`;
