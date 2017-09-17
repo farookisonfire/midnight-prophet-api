@@ -14,15 +14,25 @@ const OPINION_SCALE = "opinion_scale";
 const YES_NO = "yes_no";
 const LEGAL = "legal";
 
-function mapAnswersToQuestions(date, questions, answers, status, program) {
+function mapAnswersToQuestions(typeformPayload) {
+  const {
+    refcode = '',
+    submitDate = '',
+    status = '',
+    questions = [],
+    answers = [],
+    secondaryProgram = ''
+  } = typeformPayload
+
   const map = {};
-  status === 'secondary' ?
-    map.secondarySubmitDate = date :
-    map.primarySubmitDate = date;
+  
+  map.refcode = refcode;
   map.status = status;
-  if (program) {
-    map.secondaryProgram = program;
-  }
+  map.secondaryProgram = secondaryProgram ? secondaryProgram : '';
+  status === 'secondary' ?
+    map.secondarySubmitDate = submitDate :
+    map.primarySubmitDate = submitDate;
+  
   questions.map(question => {
     answers.map(answer => {
       if(question.id === answer.field.id) {

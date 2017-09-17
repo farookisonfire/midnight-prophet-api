@@ -5,7 +5,7 @@ const updateSlack = require('../utilities/slack');
 const ObjectId = require('mongodb').ObjectID;
 const moment = require('moment');
 
-const COLLECTION = process.env.COLLECTION || 'v2Collection';
+const COLLECTION = process.env.COLLECTION || 'v3Collection';
 const Mailchimp = require('mailchimp-api-v3');
 const mailchimp = new Mailchimp(process.env.MAILCHIMP_KEY);
 
@@ -36,16 +36,27 @@ module.exports = function routes(db) {
       definition = {},
       answers = [],
       submitted_at = moment().format('MM-DD-YYYY'),
+      hidden = {},
     } = form_response;
+
+    const { refcode = '' } = hidden;
     const questions = definition.fields || [];
     const status = 'applied';
     const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
-    const formResponse = mapAnswersToQuestions(submitDate, questions, answers, status);
 
-    // .then(updateSlack(formResponse))
+    const typeformPayload = {
+      refcode,
+      submitDate,
+      status,
+      questions,
+      answers,
+    }
+
+    const formResponse = mapAnswersToQuestions(typeformPayload);
 
     storeApplicant(myCollection, formResponse)
     .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
+    .then(updateSlack(formResponse))
     .catch((err) => res.status(500).send(err));
   });
 
@@ -94,8 +105,16 @@ module.exports = function routes(db) {
     const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
     const isValidId = checkForHexRegExp.test(id);
 
+    const typeformPayload = {
+      submitDate,
+      questions,
+      answers,
+      status,
+      secondaryProgram
+    }
+
     if (isValidId) {
-      const formResponse = mapAnswersToQuestions(submitDate, questions, answers, status, secondaryProgram);
+      const formResponse = mapAnswersToQuestions(typeformPayload);
       updateApplicant(myCollection, formResponse, id)
         .then(() => res.status(200).send('Applicant update with secondary data successful.'))
         .catch(err => {
