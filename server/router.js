@@ -2,21 +2,18 @@ const Router = require('express').Router;
 const fetch = require('node-fetch');
 const mapAnswersToQuestions = require('../utilities/typeform');
 const updateSlack = require('../utilities/slack');
-const ObjectId = require('mongodb').ObjectID;
 const moment = require('moment');
+const database = require('../utilities/database');
+const mailchimp = require('../utilities/mailchimp');
 
 const COLLECTION = process.env.COLLECTION || 'v3Collection';
-const Mailchimp = require('mailchimp-api-v3');
-const mailchimp = new Mailchimp(process.env.MAILCHIMP_KEY);
+const storeApplicant = database.storeApplicant;
+const updateApplicant = database.updateApplicant;
+const validate = database.validate;
 
-const lists = {
-  test: 'b5972e3719',
-  denied: 'b5605e65e2',
-  secondaryHealth: 'e5b5eaa47c',
-  secondaryServe: '6d961a792a',
-  secondaryImpact: '5c163c3011',
-  accepted: '213226583d',
-};
+const resolveMailClientPayload = mailchimp.resolveMailClientPayload;
+const resolveListId = mailchimp.resolveListId;
+const addToMailList = mailchimp.addToMailList;
 
 module.exports = function routes(db) {
   const router = new Router();
@@ -106,8 +103,10 @@ module.exports = function routes(db) {
     const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
 
     // validate the database id
-    const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
-    const isValidId = checkForHexRegExp.test(id);
+    // const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+    // const isValidId = checkForHexRegExp.test(id);
+
+    const isValidId = validate(id);
 
     const typeformPayload = {
       submitDate,
@@ -133,81 +132,3 @@ module.exports = function routes(db) {
 
   return router;
 };
-
-function storeApplicant(collection, formResponse) {
-  return new Promise((resolve, reject) => {
-    collection.insert(formResponse, (err, inserted) => {
-      if (err) {
-        console.log(err);
-        reject(err);
-      }
-      resolve(inserted);
-    })
-  })
-}
-
-function updateApplicant(collection, dbPayload, id) {
-  return new Promise((resolve, reject) => {
-    collection.update(
-      {_id: ObjectId(id)},
-      {$set: dbPayload},
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          reject();
-        }
-        resolve(result);
-    })
-  })
-}
-
-function resolveMailClientPayload(email, firstName, lastName, id) {
-  const payload = {
-    "email_address": email,
-    "status": "subscribed",
-    "merge_fields": {
-      "FNAME": firstName,
-      "LNAME": lastName,
-      "DBID": id,
-    }
-  };
-  return payload;
-}
-
-function resolveListId(status, program) {
-  if (status === 'denied') {
-    return lists.denied;
-  }
-
-  if (status === 'accepted') {
-    return lists.accepted;
-  }
-
-  if (status === 'secondary' && program) {
-    switch(program) {
-      case 'healthInnovation':
-        return lists.secondaryHealth;
-      case 'serve':
-        return lists.secondaryServe;
-      case 'Impact':
-        return lists.secondaryImpact;
-      default:
-        return;
-    }
-  }
-  return;
-}
-
-function addToMailList(res, mailPayload, listId) {
-  mailchimp.post({
-    path: `lists/${listId}/members`,
-    body: mailPayload,
-  }, function(err, result){
-    if (err) {
-      console.log(err);
-      return res.status(500).send('unable to add new list member.');
-    }
-    console.log('MAILCHIMP RESULT:', result);
-    return res.status(200).send('User added to list successfully.');
-  });
-}
