@@ -15,6 +15,7 @@ const lists = {
   secondaryHealth: 'e5b5eaa47c',
   secondaryServe: '6d961a792a',
   secondaryImpact: '5c163c3011',
+  accepted: '213226583d',
 };
 
 module.exports = function routes(db) {
@@ -71,13 +72,16 @@ module.exports = function routes(db) {
       program = '',
     } = req.body;
 
-    const dbPayload = program ?
-      {status: status, secondary: program} :
-      {status: status};
+    let dbPayload;
+    if (status === 'secondary') {
+      dbPayload = {status, secondary: program}
+    } else if (status) {
+      dbPayload = {status}
+    }
 
     const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id);
     const listId = resolveListId(status, program);
-    
+
     updateApplicant(myCollection, dbPayload, id)
     //TODO: do not add record to db if the subsequent step - add to MailChimp fails. 
     //Also, inform the client that the update was unsuccessful s
@@ -175,6 +179,10 @@ function resolveListId(status, program) {
     return lists.denied;
   }
 
+  if (status === 'accepted') {
+    return lists.accepted;
+  }
+
   if (status === 'secondary' && program) {
     switch(program) {
       case 'healthInnovation':
@@ -200,6 +208,6 @@ function addToMailList(res, mailPayload, listId) {
       return res.status(500).send('unable to add new list member.');
     }
     console.log('MAILCHIMP RESULT:', result);
-    res.status(200).send('User added to list successfully.');
+    return res.status(200).send('User added to list successfully.');
   });
 }
