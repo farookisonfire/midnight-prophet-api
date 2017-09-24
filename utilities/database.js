@@ -6,8 +6,10 @@ function storeApplicant(collection, formResponse) {
       if (err) {
         console.log(err);
         reject(err);
+        return;
       }
       resolve(inserted);
+      return;
     })
   })
 }
@@ -21,8 +23,10 @@ function updateApplicant(collection, dbPayload, id) {
         if (err) {
           console.log(err);
           reject();
+          return;
         }
         resolve(result);
+        return;
     })
   })
 }

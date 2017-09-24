@@ -6,7 +6,7 @@ const moment = require('moment');
 const database = require('../utilities/database');
 const mailchimp = require('../utilities/mailchimp');
 
-const COLLECTION = process.env.COLLECTION || 'v3Collection';
+const COLLECTION = process.env.COLLECTION || 'v4Collection';
 const storeApplicant = database.storeApplicant;
 const updateApplicant = database.updateApplicant;
 const validate = database.validate;
@@ -58,7 +58,7 @@ module.exports = function routes(db) {
     .catch((err) => res.status(500).send(err));
   });
 
-  // APPLICAT IS PROMOTED TO SECONDARY OR DENIED
+  // APPLICANT PROMOTED TO TIER 2 or 3
   router.put('/:id', function(req,res) {
     const {
       id = '',
@@ -76,7 +76,7 @@ module.exports = function routes(db) {
       dbPayload = {status}
     }
 
-    const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id);
+    const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id, program);
     const listId = resolveListId(status, program);
 
     updateApplicant(myCollection, dbPayload, id)
@@ -103,10 +103,7 @@ module.exports = function routes(db) {
     const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
 
     // validate the database id
-    // const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
-    // const isValidId = checkForHexRegExp.test(id);
-
-    const isValidId = validate(id);
+    const isValidId = validate.test.id
 
     const typeformPayload = {
       submitDate,

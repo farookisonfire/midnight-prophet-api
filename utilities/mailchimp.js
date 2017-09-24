@@ -11,7 +11,7 @@ const lists = {
   confirmed: '2338599b06',
 };
 
-function resolveMailClientPayload(email, firstName, lastName, id) {
+function resolveMailClientPayload(email, firstName, lastName, id, programTypeId = '') {
   const payload = {
     "email_address": email,
     "status": "subscribed",
@@ -19,6 +19,7 @@ function resolveMailClientPayload(email, firstName, lastName, id) {
       "FNAME": firstName,
       "LNAME": lastName,
       "DBID": id,
+      "PTYPE": programTypeId,
     }
   };
   return payload;

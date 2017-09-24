@@ -13,19 +13,22 @@ const secureRoutes = (db) => {
 
   router.post('/:id', (req, res) => {    
     const id = req.params.id || '';
-    const token = req.body.id;
-    const email = req.body.email;
+    const token = req.body.token.id;
+    const email = req.body.token.email;
     const description = 'Enrollment Fee';
-    const metadata = req.body.card;
     const isValidId = validate.test(id);
+    const selectedProgramId = req.body.selectedProgramId
+
+    // in future create a enrollment object in mongo. Not sure how the fact that I dont have applicant entries nested within an object is going to affect things.
 
     if (isValidId) {
       // make the charge
-      handleEnrollmentFee(token, email, description, metadata)
+      handleEnrollmentFee(token, email, description)
       .then((charge) => {
         const dbPayload = {
           status: 'confirmed',
           customerNumber: charge.customer,
+          selectedProgramId
         }
         // set applicant status to "confirmed"
         return updateApplicant(dbCollection, dbPayload, id);
