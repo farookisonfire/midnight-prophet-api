@@ -18,10 +18,12 @@ function updateSlack(formResponse) {
         if (!response.ok) { throw new Error(response.statusText); }
         console.log('ok');
         resolve();
+        return;
       })
       .catch(err => {
         console.log(err);
         reject();
+        return;
       });
   });
 }
