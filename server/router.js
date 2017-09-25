@@ -77,8 +77,8 @@ module.exports = function routes(db) {
     }
 
     const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id, program);
-    const listId = resolveListId(status, program);
 
+    const listId = resolveListId(status, program);
     updateApplicant(myCollection, dbPayload, id)
     //TODO: do not add record to db if the subsequent step - add to MailChimp fails. 
     //Also, inform the client that the update was unsuccessful s
