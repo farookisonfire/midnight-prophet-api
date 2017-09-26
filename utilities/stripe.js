@@ -11,7 +11,7 @@ const handleEnrollmentFee = (token, email, description) => {
     .then((customer) => {
       console.log('CREATED A CUSTOMER ----> ', customer);
       return stripe.charges.create({
-        amount: 100,
+        amount: 30000,
         currency: 'usd',
         customer: customer.id,
       });
