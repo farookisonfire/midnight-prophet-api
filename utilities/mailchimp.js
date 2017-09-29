@@ -63,9 +63,40 @@ function addToMailList(res, mailPayload, listId) {
   });
 }
 
+const addApplicantsToMailList = (mailPayload) => {
+  return mailchimp.batch(mailPayload);
+};
+
+const resolveMailClientPayloadv2 = ( selectedApplicants, listId, programTypeId ) => {
+  return selectedApplicants.map((applicant) => {
+    const {
+      id,
+      email,
+      firstName,
+      lastName,
+    } = applicant;
+    
+    return {
+      method: 'POST',
+      path: `lists/${listId}/members`,
+      body: {
+      email_address:email, 
+      status:"subscribed",
+      merge_fields: {
+        FNAME: firstName,
+        LNAME: lastName,
+        DBID: id,
+        PTYPE: programTypeId,
+      }
+    },
+    }
+  }) 
+}
+
 module.exports = {
   lists: lists,
-  resolveMailClientPayload: resolveMailClientPayload,
+  resolveMailClientPayload: resolveMailClientPayloadv2,
   resolveListId: resolveListId,
   addToMailList: addToMailList,
+  addApplicantsToMailList: addApplicantsToMailList,
 }
