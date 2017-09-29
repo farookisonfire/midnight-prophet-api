@@ -31,10 +31,29 @@ function updateApplicant(collection, dbPayload, id) {
   })
 }
 
+function updateManyApplicants(applicantIds, collection, dbPayload) {
+  const mongoIds = applicantIds.map(id => ObjectId(id));
+  return new Promise((resolve, reject) => {
+    collection.updateMany(
+      { _id: {$in: mongoIds} },
+      {$set: dbPayload},
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          reject();
+          return;
+        }
+        resolve(result);
+        return;
+    })
+  })
+}
+
 const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
 
 module.exports = {
   storeApplicant: storeApplicant,
   updateApplicant: updateApplicant,
   validate: checkForHexRegExp,
+  updateManyApplicants: updateManyApplicants,
 }

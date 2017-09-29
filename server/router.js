@@ -5,15 +5,18 @@ const updateSlack = require('../utilities/slack');
 const moment = require('moment');
 const database = require('../utilities/database');
 const mailchimp = require('../utilities/mailchimp');
+const utils = require('../utilities/utils');
 
-const COLLECTION = process.env.COLLECTION || 'v4Collection';
+const COLLECTION = process.env.COLLECTION || 'v5Collection';
 const storeApplicant = database.storeApplicant;
-const updateApplicant = database.updateApplicant;
 const validate = database.validate;
+const updateManyApplicants = database.updateManyApplicants;
 
 const resolveMailClientPayload = mailchimp.resolveMailClientPayload;
 const resolveListId = mailchimp.resolveListId;
-const addToMailList = mailchimp.addToMailList;
+const addApplicantsToMailList = mailchimp.addApplicantsToMailList;
+
+const splitApplicantName = utils.splitApplicantName;
 
 module.exports = function routes(db) {
   const router = new Router();
@@ -58,16 +61,22 @@ module.exports = function routes(db) {
     .catch((err) => res.status(500).send(err));
   });
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
   // APPLICANT PROMOTED TO TIER 2 or 3
-  router.put('/:id', function(req,res) {
+
+  router.put('/', function(req,res) {
     const {
-      id = '',
-      email = '',
-      firstName = '',
-      lastName = '',
-      status = '',
+      selectedApplicants = [],
       program = '',
+      status = '',
     } = req.body;
+
+    const selectedApplicantsToUse = splitApplicantName(selectedApplicants);
+    const selectedApplicantIds = selectedApplicantsToUse.map(applicant => applicant.id);
+
+    const listId = resolveListId(status, program);
+    const mailChimpPayload = resolveMailClientPayload(selectedApplicantsToUse, listId, program);
 
     let dbPayload;
     if (status === 'secondary') {
@@ -75,18 +84,21 @@ module.exports = function routes(db) {
     } else if (status) {
       dbPayload = {status}
     }
-
-    const mailClientPayload = resolveMailClientPayload(email, firstName, lastName, id, program);
-    const listId = resolveListId(status, program);
-
-    updateApplicant(myCollection, dbPayload, id)
-    //TODO: do not add record to db if the subsequent step - add to MailChimp fails. 
-    //Also, inform the client that the update was unsuccessful s
-      .then(() => addToMailList(res, mailClientPayload, listId))
+    
+    addApplicantsToMailList(mailChimpPayload)
+      .then(() => updateManyApplicants(selectedApplicantIds, myCollection, dbPayload))
+      .then(() => {
+        console.log('Applicants added to DB and MailList');
+        return res.status(200).send('Applicants added to db and mail list.');
+      })
+    //TODO: inform the client that the update was unsuccessfuls
       .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
   });
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
    // APPLICANT SUBMITS PART 2 APP (WEBHOOK)
+
   router.post('/secondary/:program', (req, res) => {
     const secondaryProgram = req.params.program || '';
     const { form_response = {} } = req.body;
