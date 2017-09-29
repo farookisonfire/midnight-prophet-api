@@ -10,6 +10,7 @@ const utils = require('../utilities/utils');
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
 const storeApplicant = database.storeApplicant;
 const validate = database.validate;
+const updateApplicant = database.updateApplicant;
 const updateManyApplicants = database.updateManyApplicants;
 
 const resolveMailClientPayload = mailchimp.resolveMailClientPayload;
