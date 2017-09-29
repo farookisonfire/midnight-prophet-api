@@ -16,7 +16,6 @@ const LEGAL = "legal";
 
 function mapAnswersToQuestions(typeformPayload) {
   const {
-    refcode = '',
     submitDate = '',
     status = '',
     questions = [],
@@ -26,7 +25,10 @@ function mapAnswersToQuestions(typeformPayload) {
 
   const map = {};
 
-  map.refcode = refcode;
+  if (typeformPayload.refcode) {
+    map.refcode = typeformPayload.refcode;
+  }
+
   map.status = status;
   map.secondaryProgram = secondaryProgram;
   status === 'secondary' ?
