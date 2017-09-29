@@ -116,7 +116,7 @@ module.exports = function routes(db) {
     const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
 
     // validate the database id
-    const isValidId = validate.test.id
+    const isValidId = validate.test(id)
 
     const typeformPayload = {
       submitDate,
@@ -125,11 +125,13 @@ module.exports = function routes(db) {
       status,
       secondaryProgram
     }
-
     if (isValidId) {
       const formResponse = mapAnswersToQuestions(typeformPayload);
       updateApplicant(myCollection, formResponse, id)
-        .then(() => res.status(200).send('Applicant update with secondary data successful.'))
+        .then(() => {
+          console.log('DB tier 2 update is successful')
+          return res.status(200).send('Applicant update with secondary data successful.')
+        })
         .catch(err => {
           console.log('catch', err)
           res.status(500).send('Error, unable to update applicant with secondary.')
