@@ -86,6 +86,15 @@ module.exports = function routes(db) {
       dbPayload = {status}
     }
     
+    if (status === 'removed') {
+      return updateManyApplicants(selectedApplicantIds, myCollection, dbPayload)
+        .then(() => {
+          console.log('Applicants status set to REMOVED');
+          return res.status(200).send('Applicants added to db and mail list.');
+        })
+        .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
+    }
+
     addApplicantsToMailList(mailChimpPayload)
       .then(() => updateManyApplicants(selectedApplicantIds, myCollection, dbPayload))
       .then(() => {
