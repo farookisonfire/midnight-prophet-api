@@ -3,52 +3,49 @@ const fetch = require('node-fetch');
 const handleEnrollmentFee = require('../utilities/stripe');
 const database = require('../utilities/database');
 
-const COLLECTION = process.env.COLLECTION || 'v3Collection';
-const updateApplicant = database.updateApplicant;
+const COLLECTION = process.env.COLLECTION_FELLOWSHIP || 'v1Fellowship';
+const storeApplicant = database.storeApplicant;
 const validate = database.validate;
 
-const secureRoutes = (db) => {
+const fellowshipRoutes = (db) => {
   const router = new Router();
   const dbCollection = db.collection(COLLECTION);
 
-  router.post('/:id', (req, res) => {    
-    const id = req.params.id || '';
+  router.post('/', (req, res) => {   
     const token = req.body.token.id;
     const email = req.body.token.email;
     const {
       selectedProgramId = '',
       enrollmentFee = '',
+      name = {},
     } = req.body;
-    const description = 'Enrollment Fee';
-    const isValidId = validate.test(id);
+    const description = 'Fellowship Enrollment Fee';
 
-
-    // in future create a enrollment object in mongo. Not sure how the fact that I dont have applicant entries nested within an object is going to affect things.
-
-    if (isValidId) {
       // make the charge
       handleEnrollmentFee(token, email, description, enrollmentFee)
       .then((charge) => {
         const dbPayload = {
           status: 'confirmed',
           customerNumber: charge.customer,
-          selectedProgramId
+          selectedProgramId,
+          firstName: name.fn,
+          lastName: name.ln,
         }
-        // set applicant status to "confirmed"
-        return updateApplicant(dbCollection, dbPayload, id);
+
+        return storeApplicant(dbCollection, dbPayload);
       })
       // TODO: move applicant from accepted to confirmed mailchimp list.
-      .then(() => res.status(200).json({'payment':'success'}))
+      .then(() => {
+        console.log('Fellow stored, and payment success.')
+        return res.status(200).json({'payment':'success'})
+      })
       .catch((err) => {
         console.log(err);
         return res.status(500).send('Unable to update applicant to confirmed status.')
       })
-    } else {
-      return res.status(500).send('Transaction rejected. The user ID is invalid.')
-    }
   })
 
   return router;
 }
 
-module.exports = secureRoutes;
+module.exports = fellowshipRoutes;

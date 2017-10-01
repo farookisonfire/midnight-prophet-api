@@ -4,6 +4,7 @@ const cors = require('cors');
 const routes = require('./router');
 const donationRoutes = require('./donation-routes');
 const secureRoutes = require('./secure-routes');
+const fellowshipRoutes = require('./fellowship-routes');
 
 module.exports = function createApp(db) {
   const app = express();
@@ -13,6 +14,7 @@ module.exports = function createApp(db) {
   app.use('/api/applicants', routes(db));
   app.use('/donation', donationRoutes());
   app.use('/secure', secureRoutes(db));
+  app.use('/fellowship', fellowshipRoutes(db));
   app.use((err, req, res, next) => {
     res.status(500).send("500 Internal server error");
   });
