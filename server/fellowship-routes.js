@@ -12,8 +12,6 @@ const fellowshipRoutes = (db) => {
   const dbCollection = db.collection(COLLECTION);
 
   router.post('/', (req, res) => {   
-    console.log('REQUEST BODY ------------------------', req.body);
-    
     const token = req.body.token.id;
     const email = req.body.token.email;
     const {
