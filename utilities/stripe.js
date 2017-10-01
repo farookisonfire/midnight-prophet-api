@@ -1,5 +1,4 @@
 var secret = process.env.STRIPE_SECRET_KEY || "sk_test_6m55BYyH2L1xa7j9uboViaNq";
-// var secret = "sk_test_6m55BYyH2L1xa7j9uboViaNq";
 var stripe = require("stripe")(secret);
 
 const handleEnrollmentFee = (token, email, description, fee) => {
