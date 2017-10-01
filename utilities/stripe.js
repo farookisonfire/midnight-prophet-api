@@ -1,7 +1,8 @@
 var secret = process.env.STRIPE_SECRET_KEY || "sk_test_6m55BYyH2L1xa7j9uboViaNq";
+// var secret = "sk_test_6m55BYyH2L1xa7j9uboViaNq";
 var stripe = require("stripe")(secret);
 
-const handleEnrollmentFee = (token, email, description) => {
+const handleEnrollmentFee = (token, email, description, fee) => {
   return new Promise((resolve, reject) => {
     stripe.customers.create({
       email: email,
@@ -11,7 +12,7 @@ const handleEnrollmentFee = (token, email, description) => {
     .then((customer) => {
       console.log('CREATED A CUSTOMER ----> ', customer);
       return stripe.charges.create({
-        amount: 30000,
+        amount: parseInt(fee) * 100,
         currency: 'usd',
         customer: customer.id,
       });
