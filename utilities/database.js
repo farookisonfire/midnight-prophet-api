@@ -31,6 +31,24 @@ function updateApplicant(collection, dbPayload, id) {
   })
 }
 
+function findOneAndUpdateApplicant(collection, dbPayload, id) {
+  return new Promise((resolve, reject) => {
+    collection.findOneAndUpdate(
+      {_id: ObjectId(id)},
+      {$set: dbPayload},
+      {returnOriginal: false},
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          reject();
+          return;
+        }
+        resolve(result);
+        return;
+    })
+  })
+}
+
 function updateManyApplicants(applicantIds, collection, dbPayload) {
   const mongoIds = applicantIds.map(id => ObjectId(id));
   return new Promise((resolve, reject) => {
@@ -56,4 +74,5 @@ module.exports = {
   updateApplicant: updateApplicant,
   validate: checkForHexRegExp,
   updateManyApplicants: updateManyApplicants,
+  findOneAndUpdateApplicant: findOneAndUpdateApplicant,
 }
