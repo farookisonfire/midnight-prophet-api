@@ -2,10 +2,12 @@ const Router = require('express').Router;
 const fetch = require('node-fetch');
 const handleEnrollmentFee = require('../utilities/stripe');
 const database = require('../utilities/database');
-
 const COLLECTION = process.env.COLLECTION || 'v3Collection';
-const updateApplicant = database.updateApplicant;
+const findOneAndUpdateApplicant = database.findOneAndUpdateApplicant;
 const validate = database.validate;
+const mailchimp = require('../utilities/mailchimp');
+const resolveMailClientPayloadOne = mailchimp.resolveMailClientPayloadOne;
+const addApplicantToMailList = mailchimp.addApplicantToMailList;
 
 const secureRoutes = (db) => {
   const router = new Router();
@@ -22,8 +24,7 @@ const secureRoutes = (db) => {
     const description = 'Enrollment Fee';
     const isValidId = validate.test(id);
 
-
-    // in future create a enrollment object in mongo. Not sure how the fact that I dont have applicant entries nested within an object is going to affect things.
+    const listId = mailchimp.lists.confirmed;
 
     if (isValidId) {
       // make the charge
@@ -34,11 +35,24 @@ const secureRoutes = (db) => {
           customerNumber: charge.customer,
           selectedProgramId
         }
-        // set applicant status to "confirmed"
-        return updateApplicant(dbCollection, dbPayload, id);
+        return findOneAndUpdateApplicant(dbCollection, dbPayload, id);
       })
       // TODO: move applicant from accepted to confirmed mailchimp list.
-      .then(() => res.status(200).json({'payment':'success'}))
+      .then((result) => {
+        const { value = {} } = result;
+        const applicantDetails = {
+          firstName: value['First Name'],
+          lastName: value['Last Name'],
+          id: value['_id'],
+          email: value['Email'],
+        }
+        const mailClientPayload = resolveMailClientPayloadOne(applicantDetails);
+        return addApplicantToMailList(mailClientPayload, listId);
+      })
+      .then(() => {
+        console.log('CHARGE MADE, APPLICANT UPDATE, APPLICANT ADD MAIL LIST - SUCCESS')
+        return res.status(200).json({'payment':'success'})
+      })
       .catch((err) => {
         console.log(err);
         return res.status(500).send('Unable to update applicant to confirmed status.')

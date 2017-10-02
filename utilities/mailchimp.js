@@ -11,20 +11,6 @@ const lists = {
   confirmed: '2338599b06',
 };
 
-function resolveMailClientPayload(email, firstName, lastName, id, programTypeId = '') {
-  const payload = {
-    "email_address": email,
-    "status": "subscribed",
-    "merge_fields": {
-      "FNAME": firstName,
-      "LNAME": lastName,
-      "DBID": id,
-      "PTYPE": programTypeId,
-    }
-  };
-  return payload;
-}
-
 function resolveListId(status, program) {
   if (status === 'denied') {
     return lists.denied;
@@ -49,25 +35,40 @@ function resolveListId(status, program) {
   return;
 }
 
-function addToMailList(res, mailPayload, listId) {
-  mailchimp.post({
+function resolveMailClientPayloadOne(applicantDetails) {
+  const {
+    email = '',
+    firstName = '',
+    lastName = '',
+    id = '',
+  } = applicantDetails;
+
+  const payload = {
+    "email_address": email,
+    "status": "subscribed",
+    "merge_fields": {
+      "FNAME": firstName,
+      "LNAME": lastName,
+      "DBID": id,
+    }
+  };
+  return payload;
+}
+
+function addApplicantToMailList(mailPayload, listId) {
+  return mailchimp.post({
     path: `lists/${listId}/members`,
     body: mailPayload,
-  }, function(err, result){
-    if (err) {
-      console.log(err);
-      return res.status(500).send('unable to add new list member.');
-    }
-    console.log('MAILCHIMP RESULT:', result);
-    return res.status(200).send('User added to list successfully.');
-  });
+  })
+  .then(result => console.log('------------- Mailchimp Result --------------', result))
+  .catch(err => console.log('addApplicantToMailList Error', err));
 }
 
 const addApplicantsToMailList = (mailPayload) => {
   return mailchimp.batch(mailPayload);
 };
 
-const resolveMailClientPayloadv2 = ( selectedApplicants, listId, programTypeId ) => {
+const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId ) => {
   return selectedApplicants.map((applicant) => {
     const {
       id,
@@ -95,8 +96,9 @@ const resolveMailClientPayloadv2 = ( selectedApplicants, listId, programTypeId )
 
 module.exports = {
   lists: lists,
-  resolveMailClientPayload: resolveMailClientPayloadv2,
+  resolveMailClientPayloadOne: resolveMailClientPayloadOne,
+  resolveMailClientPayload: resolveMailClientPayloadMany,
   resolveListId: resolveListId,
-  addToMailList: addToMailList,
+  addApplicantToMailList: addApplicantToMailList,
   addApplicantsToMailList: addApplicantsToMailList,
 }
