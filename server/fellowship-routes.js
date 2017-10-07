@@ -26,6 +26,7 @@ const fellowshipRoutes = (db) => {
       .then((charge) => {
         const dbPayload = {
           status: 'confirmed',
+          memberType: 'fellow',
           customerNumber: charge.customer,
           selectedProgramId,
           firstName: name.fn,

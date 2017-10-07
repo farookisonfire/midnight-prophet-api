@@ -27,4 +27,53 @@ const handleEnrollmentFee = (token, email, description, fee) => {
   })
 }
 
-module.exports = handleEnrollmentFee;
+const chargeCustomer = (customerId, fee, description) => {
+  return new Promise((resolve, reject) => {
+    stripe.charges.create({
+      amount: parseInt(fee) * 100,
+      currency: 'usd',
+      customer: customerId,
+      description: description
+    })
+    .then(charge => resolve(charge))
+    .catch((err) => {
+      console.log(err);
+      return reject(err);
+    })
+  })
+}
+
+const retrieveCustomer = (customerId) => {
+  return new Promise((resolve, reject) => {
+    stripe.customers.retrieve(
+      customerId,
+      (err, customer) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(customer);
+      }
+    )
+  })
+}
+
+const retrieveCustomerCharges = (customerId) => {
+  return new Promise((resolve, reject) => {
+    stripe.charges.list(
+      {customer: customerId},
+      (err, charges) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(charges);
+      }
+    )
+  })
+}
+
+module.exports = {
+  handleEnrollmentFee,
+  retrieveCustomer,
+  chargeCustomer,
+  retrieveCustomerCharges,
+}

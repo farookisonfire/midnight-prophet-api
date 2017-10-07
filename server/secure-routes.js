@@ -1,10 +1,13 @@
 const Router = require('express').Router;
 const fetch = require('node-fetch');
-const handleEnrollmentFee = require('../utilities/stripe');
+const stripe = require('../utilities/stripe');
+const handleEnrollmentFee = stripe.handleEnrollmentFee;
+
 const database = require('../utilities/database');
-const COLLECTION = process.env.COLLECTION || 'v3Collection';
+const COLLECTION = process.env.COLLECTION || 'v5Collection';
 const findOneAndUpdateApplicant = database.findOneAndUpdateApplicant;
 const validate = database.validate;
+
 const mailchimp = require('../utilities/mailchimp');
 const resolveMailClientPayloadOne = mailchimp.resolveMailClientPayloadOne;
 const addApplicantToMailList = mailchimp.addApplicantToMailList;
