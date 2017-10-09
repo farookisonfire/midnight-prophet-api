@@ -22,7 +22,7 @@ function updateApplicant(collection, dbPayload, id) {
       (err, result) => {
         if (err) {
           console.log(err);
-          reject();
+          reject(err);
           return;
         }
         resolve(result);
@@ -67,6 +67,22 @@ function updateManyApplicants(applicantIds, collection, dbPayload) {
   })
 }
 
+function findOneApplicant(id, collection) {
+  return new Promise((resolve, reject) => {
+    collection.findOne({_id:ObjectId(id)})
+    .then((doc) => resolve(doc))
+    .catch((err) => reject(err));
+  })
+}
+
+function findOneProgram(programId, collection) {
+  return new Promise((resolve, reject) => {
+    collection.findOne({id:programId})
+    .then((doc) => resolve(doc))
+    .catch((err) => reject(err));
+  })
+}
+
 const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
 
 module.exports = {
@@ -75,4 +91,6 @@ module.exports = {
   validate: checkForHexRegExp,
   updateManyApplicants: updateManyApplicants,
   findOneAndUpdateApplicant: findOneAndUpdateApplicant,
+  findOneApplicant: findOneApplicant,
+  findOneProgram: findOneProgram,
 }

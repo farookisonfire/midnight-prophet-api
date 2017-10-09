@@ -60,8 +60,6 @@ function addApplicantToMailList(mailPayload, listId) {
     path: `lists/${listId}/members`,
     body: mailPayload,
   })
-  .then(result => console.log('------------- Mailchimp Result --------------', result))
-  .catch(err => console.log('addApplicantToMailList Error', err));
 }
 
 const addApplicantsToMailList = (mailPayload) => {
