@@ -1,11 +1,11 @@
 const Router = require('express').Router;
 const fetch = require('node-fetch');
-const handleEnrollmentFee = require('../utilities/stripe');
+const stripe = require('../utilities/stripe');
+const handleEnrollmentFee = stripe.handleEnrollmentFee;
 const database = require('../utilities/database');
 
 const COLLECTION = process.env.COLLECTION_FELLOWSHIP || 'v1Fellowship';
 const storeApplicant = database.storeApplicant;
-const validate = database.validate;
 
 const fellowshipRoutes = (db) => {
   const router = new Router();

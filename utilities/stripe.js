@@ -28,6 +28,10 @@ const handleEnrollmentFee = (token, email, description, fee) => {
 }
 
 const chargeCustomer = (customerId, fee, description) => {
+  console.log('------------------------------ customerId', customerId)
+  console.log('------------------------------fee',fee )
+  console.log('------------------------------description', description)
+  
   return new Promise((resolve, reject) => {
     stripe.charges.create({
       amount: parseInt(fee) * 100,
@@ -35,7 +39,10 @@ const chargeCustomer = (customerId, fee, description) => {
       customer: customerId,
       description: description
     })
-    .then(charge => resolve(charge))
+    .then(charge => {
+      console.log('charge success', charge)
+      return resolve(charge)
+    })
     .catch((err) => {
       console.log(err);
       return reject(err);

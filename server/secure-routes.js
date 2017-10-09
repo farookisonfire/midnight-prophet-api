@@ -1,5 +1,6 @@
 const Router = require('express').Router;
 const fetch = require('node-fetch');
+const moment = require('moment');
 const stripe = require('../utilities/stripe');
 const handleEnrollmentFee = stripe.handleEnrollmentFee;
 
@@ -26,6 +27,7 @@ const secureRoutes = (db) => {
     } = req.body;
     const description = 'Enrollment Fee';
     const isValidId = validate.test(id);
+    const promotionDeadline = moment().add(16, 'days').format('YYYY-MM-DD')
 
     const listId = mailchimp.lists.confirmed;
 
@@ -36,7 +38,8 @@ const secureRoutes = (db) => {
         const dbPayload = {
           status: 'confirmed',
           customerNumber: charge.customer,
-          selectedProgramId
+          selectedProgramId,
+          promotionDeadline 
         }
         return findOneAndUpdateApplicant(dbCollection, dbPayload, id);
       })
@@ -52,7 +55,7 @@ const secureRoutes = (db) => {
         const mailClientPayload = resolveMailClientPayloadOne(applicantDetails);
         return addApplicantToMailList(mailClientPayload, listId);
       })
-      .then(() => {
+      .then((result) => {
         console.log('CHARGE MADE, APPLICANT UPDATE, APPLICANT ADD MAIL LIST - SUCCESS')
         return res.status(200).json({'payment':'success'})
       })
