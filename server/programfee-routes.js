@@ -53,10 +53,14 @@ const programFeeRoutes = (db) => {
             const promotionDeadline = applicant.promotionDeadline ?
               applicant.promotionDeadline :
               '';
+            const finalDeadline = applicant.finalDeadline ?
+              applicant.finalDeadline :
+              '';
             
             applicantDetails.discount = discount;
             applicantDetails.firstName = firstName;
             applicantDetails.promotionDeadline = promotionDeadline;
+            applicantDetails.finalDeadline = finalDeadline;
             
             return programId
           })
@@ -76,7 +80,10 @@ const programFeeRoutes = (db) => {
     const programFee = req.body.enrollmentFee || '';
     const description = 'Program Fee Payment';
     const isValidId = validate.test(id);
-    const dbPayload = { status: 'paid in full' };
+    const dbPayload = { 
+      paymentStatus: 'paid in full',
+      paymentDate: moment().format('YYYY-MM-DD')
+    };
     const fellow = req.body.fellow || '';
 
     if (isValidId) {
@@ -96,8 +103,31 @@ const programFeeRoutes = (db) => {
           console.log(err);
           res.status(500).send('Program fee payment failed.')
         })
+    } else {
+      return res.status(500).json({msg: "Invalid user id"})
     }
-    return res.status(500).json({msg: "Invalid user id"})
+  })
+
+  router.post('/paymentplan/:id/:fellow', (req, res) => {
+    const fellow = req.params.fellow || '';
+    const id = req.params.id || '';
+    const isValidId = validate.test(id);
+    const dbPayload = { paymentStatus: 'payment plan' };
+    
+    if (isValidId) {
+      const collectionToUse = fellow === 'true'?
+          fellowshipCollection :
+          applicantCollection;
+
+        updateApplicant(collectionToUse, dbPayload, id)
+        .then(() => res.status(200).json({payment:"Payment plan enrollment success"}))
+        .catch((err) => {
+          console.log('error', err);
+          return res.status(500).send('Payment plan enrollment fail')
+        })
+    } else {
+      return res.status(500).json({msg: "Invalid user id"})
+    }
   })
   
   return router;

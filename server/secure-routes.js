@@ -27,7 +27,8 @@ const secureRoutes = (db) => {
     } = req.body;
     const description = 'Enrollment Fee';
     const isValidId = validate.test(id);
-    const promotionDeadline = moment().add(16, 'days').format('YYYY-MM-DD')
+    const promotionDeadline = moment().add(16, 'days').format('YYYY-MM-DD');
+    const finalDeadline = moment().add(90, 'days').format('YYYY-MM-DD');
 
     const listId = mailchimp.lists.confirmed;
 
@@ -39,7 +40,8 @@ const secureRoutes = (db) => {
           status: 'confirmed',
           customerNumber: charge.customer,
           selectedProgramId,
-          promotionDeadline 
+          promotionDeadline,
+          finalDeadline
         }
         return findOneAndUpdateApplicant(dbCollection, dbPayload, id);
       })
