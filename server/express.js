@@ -6,6 +6,7 @@ const donationRoutes = require('./donation-routes');
 const secureRoutes = require('./secure-routes');
 const fellowshipRoutes = require('./fellowship-routes');
 const programFeeRoutes = require('./programfee-routes');
+const initialDataRoutes = require('./initial-data-routes');
 
 module.exports = function createApp(db) {
   const app = express();
@@ -13,6 +14,7 @@ module.exports = function createApp(db) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use('/api/applicants', routes(db));
+  app.use('/api/initial-data', initialDataRoutes(db));
   app.use('/donation', donationRoutes());
   app.use('/secure', secureRoutes(db));
   app.use('/fellowship', fellowshipRoutes(db));
