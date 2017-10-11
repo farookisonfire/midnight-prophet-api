@@ -27,13 +27,12 @@ const handleEnrollmentFee = (token, email, description, fee) => {
   })
 }
 
-const chargeCustomer = (customerId, fee, description) => {
+const chargeCustomer = (customerId, fee) => {
   return new Promise((resolve, reject) => {
     stripe.charges.create({
       amount: parseInt(fee) * 100,
       currency: 'usd',
       customer: customerId,
-      description: description
     })
     .then(charge => {
       console.log('charge success', charge)
@@ -42,6 +41,21 @@ const chargeCustomer = (customerId, fee, description) => {
     .catch((err) => {
       console.log(err);
       return reject(err);
+    })
+  })
+}
+
+const createCustomer = (token, email, description) => {
+  return new Promise((resolve, reject) => {
+    stripe.customers.create({
+      email: email,
+      description: description,
+      source: token,
+    })
+    .then(customer => resolve(customer))
+    .catch((err) => {
+      console.log('Create Customer Error', err);
+      reject(err);
     })
   })
 }
@@ -79,4 +93,5 @@ module.exports = {
   retrieveCustomer,
   chargeCustomer,
   retrieveCustomerCharges,
+  createCustomer,
 }
