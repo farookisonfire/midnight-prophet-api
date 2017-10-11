@@ -3,7 +3,11 @@ const moment = require('moment');
 const stripe = require('../utilities/stripe');
 const database = require('../utilities/database');
 
-const { chargeCustomer } = stripe;
+const {
+  chargeCustomer,
+  createCustomer
+} = stripe;
+
 const {
   findOneApplicant,
   findOneProgram,
@@ -78,6 +82,8 @@ const programFeeRoutes = (db) => {
   router.post('/:id', (req, res) => {
     const id = req.params.id || '';
     const programFee = req.body.enrollmentFee || '';
+    const token = req.body.token.id;
+    const email = req.body.token.email;
     const description = 'Program Fee Payment';
     const isValidId = validate.test(id);
     const dbPayload = { 
@@ -94,9 +100,13 @@ const programFeeRoutes = (db) => {
       return findOneApplicant(id, collectionToUse)
         .then(applicant => {
           dbPayload.qualifyPromotion = checkQualifyPromotion(applicant.promotionDeadline)
-          return applicant.customerNumber || '';
         })
-        .then(customerNumber => chargeCustomer(customerNumber, programFee, description))
+        .then(() => createCustomer(token, email, description))
+        .then((customer) => {
+          dbPayload.customer = customer;
+          const { id = '' } = customer;
+          return chargeCustomer(id, programFee);
+        })
         .then(() => updateApplicant(collectionToUse, dbPayload, id))
         .then(() => res.status(200).json({payment:"program fee success"}))
         .catch((err) => {
