@@ -6,6 +6,10 @@ const moment = require('moment');
 const database = require('../utilities/database');
 const mailchimp = require('../utilities/mailchimp');
 const utils = require('../utilities/utils');
+const {
+  sendTextMessage,
+  userSubmitAppMsg,
+ } = require('../utilities/twilio');
 
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
 const storeApplicant = database.storeApplicant;
@@ -55,11 +59,18 @@ module.exports = function routes(db) {
     }
 
     const formResponse = mapAnswersToQuestions(typeformPayload);
+    const applicantFirstName = formResponse['First Name']
+    const applicantPhone = formResponse['Mobile Phone Number'];
+    const messageToSend = userSubmitAppMsg(applicantFirstName);
 
     storeApplicant(myCollection, formResponse)
+    .then(() => sendTextMessage(messageToSend, applicantPhone))
     .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
     .then(updateSlack(formResponse))
-    .catch((err) => res.status(500).send(err));
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).send(err)
+    });
   });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
