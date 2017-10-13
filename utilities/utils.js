@@ -4,6 +4,7 @@ const splitApplicantName = (applicants) => {
       name,
       id,
       email,
+      phone,
     } = applicant;
 
     const applicantName = name.split(' ');
@@ -11,10 +12,11 @@ const splitApplicantName = (applicants) => {
       const lastName = applicantName[applicantName.length - 1];
     
     return {
-      firstName: firstName,
-      lastName: lastName,
-      id: id,
-      email: email,
+      firstName,
+      lastName,
+      id,
+      email,
+      phone,
     }
   })
 }
