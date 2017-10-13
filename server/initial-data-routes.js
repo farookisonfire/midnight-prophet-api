@@ -2,12 +2,13 @@ const Router = require('express').Router;
 
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
 const COLLECTION_PROGRAMS = process.env.COLLECTION_PROGRAMS || 'v1Programs';
+const COLLECTION_FELLOWSHIP = process.env.COLLECTION_FELLOWSHIP || 'v1Fellowship';
 
 const initialDataRoutes = (db) => {
-  console.log('GET initial data route hit');
   const router = new Router();
   const applicantCollection = db.collection(COLLECTION);
   const programsCollection = db.collection(COLLECTION_PROGRAMS);
+  const fellowsCollection = db.collection(COLLECTION_FELLOWSHIP);
 
   router.get('/', (req, res) => {
     const data = {};
@@ -15,6 +16,8 @@ const initialDataRoutes = (db) => {
       .then(applicants => data.applicants = applicants)
       .then(() => programsCollection.find().toArray())
       .then(programs => data.programs = programs)
+      .then(() => fellowsCollection.find().toArray())
+      .then(fellows => data.fellows = fellows)
       .then(() => res.status(200).json({data}))
       .catch((err) => {
         console.log(err);
