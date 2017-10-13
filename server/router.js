@@ -8,6 +8,7 @@ const mailchimp = require('../utilities/mailchimp');
 const utils = require('../utilities/utils');
 const {
   sendTextMessage,
+  sendManyTextMessages,
   userSubmitAppMsg,
  } = require('../utilities/twilio');
 
@@ -106,14 +107,17 @@ module.exports = function routes(db) {
         .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
     }
 
+
+
     addApplicantsToMailList(mailChimpPayload)
       .then(() => updateManyApplicants(selectedApplicantIds, myCollection, dbPayload))
+      .then(() => sendManyTextMessages(selectedApplicantsToUse, status))
       .then(() => {
         console.log('Applicants added to DB and MailList');
         return res.status(200).send('Applicants added to db and mail list.');
       })
     //TODO: inform the client that the update was unsuccessfuls
-      .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
+      .catch((err) => console.log('caught after updateApplicant and addToMailList and sendManyTextMessages', err));
   });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
