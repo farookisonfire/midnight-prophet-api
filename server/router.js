@@ -67,7 +67,7 @@ module.exports = function routes(db) {
     storeApplicant(myCollection, formResponse)
     .then(() => sendTextMessage(messageToSend, applicantPhone))
     .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
-    .then(updateSlack(formResponse))
+    // .then(updateSlack(formResponse))
     .catch((err) => {
       console.log(err);
       return res.status(500).send(err)
@@ -165,6 +165,28 @@ module.exports = function routes(db) {
       res.status(500).send('Invalid UserId');
     }
   });
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   // APPLICANT WITHDRAW
+  router.post('/withdraw', (req, res) => {
+    const { form_response = {} } = req.body;
+    const { hidden = {} } = form_response;
+    const id = hidden.dbid || '';
+    const dbPayload = { status: "withdrawn" };
+    const isValidId = validate.test(id)
+    console.log('withdraw path hit', id)
+
+    if (isValidId) {
+      updateApplicant(myCollection, dbPayload, id)
+      .then(() => res.status(200).send('Ok'))
+      .catch((err) => {
+        console.log(err);
+        res.status(500).send('Unable to withdraw applicant.');
+      })
+    } else {
+      res.status(500).send('Invalid Id. Unable to withdraw applicant.')
+    }
+  })
 
   return router;
 };

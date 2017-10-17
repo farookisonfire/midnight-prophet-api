@@ -1,7 +1,7 @@
 const Router = require('express').Router;
 
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
-const COLLECTION_PROGRAMS = process.env.COLLECTION_PROGRAMS || 'v1Programs';
+const COLLECTION_PROGRAMS = process.env.COLLECTION_PROGRAMS || 'v3Programs';
 const COLLECTION_FELLOWSHIP = process.env.COLLECTION_FELLOWSHIP || 'v1Fellowship';
 
 const initialDataRoutes = (db) => {
