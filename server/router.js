@@ -99,8 +99,6 @@ module.exports = function routes(db) {
     } else if (status) {
       dbPayload = {status}
     }
-
-    return res.status(200).send('ok');
     
     if (status === 'removed') {
       return updateManyApplicants(selectedApplicantIds, myCollection, dbPayload)
