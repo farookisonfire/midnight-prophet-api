@@ -69,7 +69,7 @@ const addApplicantsToMailList = (mailPayload) => {
   return mailchimp.batch(mailPayload);
 };
 
-const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId ) => {
+const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId, deadline ) => {
   return selectedApplicants.map((applicant) => {
     const {
       id,
@@ -89,6 +89,7 @@ const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId
         LNAME: lastName,
         DBID: id,
         PTYPE: programTypeId,
+        DEADLINE: deadline,
       }
     },
     }
