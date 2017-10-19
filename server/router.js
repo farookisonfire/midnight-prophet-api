@@ -64,6 +64,7 @@ module.exports = function routes(db) {
     const applicantPhone = formResponse['Mobile Phone Number'];
     const messageToSend = userSubmitAppMsg(applicantFirstName);
 
+    console.log('PRIMARY APP SUBMISSION ->', formResponse);
     res.status(200).send('ok');
 
     // storeApplicant(myCollection, formResponse)
