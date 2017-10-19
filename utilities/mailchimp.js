@@ -6,7 +6,8 @@ const lists = {
   denied: 'b5605e65e2',
   secondaryHealth: 'e5b5eaa47c',
   secondaryServe: '6d961a792a',
-  secondaryImpact: '5c163c3011',
+  secondaryEducation: '30309beba4',
+  secondaryYouth: '892191e664',
   accepted: '213226583d',
   confirmed: '2338599b06',
 };
@@ -26,8 +27,10 @@ function resolveListId(status, program) {
         return lists.secondaryHealth;
       case 'serve':
         return lists.secondaryServe;
-      case 'Impact':
-        return lists.secondaryImpact;
+      case 'education':
+        return lists.secondaryEducation;
+      case 'youthEmpowerment':
+        return lists.secondaryYouth;
       default:
         return;
     }
