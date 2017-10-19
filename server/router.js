@@ -64,14 +64,16 @@ module.exports = function routes(db) {
     const applicantPhone = formResponse['Mobile Phone Number'];
     const messageToSend = userSubmitAppMsg(applicantFirstName);
 
-    storeApplicant(myCollection, formResponse)
-    .then(() => sendTextMessage(messageToSend, applicantPhone))
-    .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
+    res.status(200).send('ok');
+
+    // storeApplicant(myCollection, formResponse)
+    // .then(() => sendTextMessage(messageToSend, applicantPhone))
+    // .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
     // .then(updateSlack(formResponse))
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).send(err)
-    });
+    // .catch((err) => {
+      // console.log(err);
+      // return res.status(500).send(err)
+    // });
   });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +99,8 @@ module.exports = function routes(db) {
     } else if (status) {
       dbPayload = {status}
     }
+
+    return res.status(200).send('ok');
     
     if (status === 'removed') {
       return updateManyApplicants(selectedApplicantIds, myCollection, dbPayload)
