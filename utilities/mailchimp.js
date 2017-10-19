@@ -27,8 +27,6 @@ function resolveListId(status, program) {
         return lists.secondaryHealth;
       case 'serve':
         return lists.secondaryServe;
-      case 'Impact':
-        return lists.secondaryImpact;
       case 'education':
         return lists.secondaryEducation;
       case 'youthEmpowerment':
