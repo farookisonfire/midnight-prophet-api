@@ -12,7 +12,7 @@ const {
   userSubmitAppMsg,
  } = require('../utilities/twilio');
 
-const COLLECTION = process.env.COLLECTION || 'v5Collection';
+const COLLECTION = process.env.COLLECTION || 'v6Collection';
 const storeApplicant = database.storeApplicant;
 const validate = database.validate;
 const updateApplicant = database.updateApplicant;
@@ -64,17 +64,14 @@ module.exports = function routes(db) {
     const applicantPhone = formResponse['Mobile Phone Number'];
     const messageToSend = userSubmitAppMsg(applicantFirstName);
 
-    console.log('PRIMARY APP SUBMISSION ->', formResponse);
-    res.status(200).send('ok');
-
-    // storeApplicant(myCollection, formResponse)
-    // .then(() => sendTextMessage(messageToSend, applicantPhone))
-    // .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
-    // .then(updateSlack(formResponse))
-    // .catch((err) => {
-      // console.log(err);
-      // return res.status(500).send(err)
-    // });
+    storeApplicant(myCollection, formResponse)
+    .then(() => sendTextMessage(messageToSend, applicantPhone))
+    .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
+    .then(updateSlack(formResponse))
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).send(err)
+    });
   });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,15 +85,29 @@ module.exports = function routes(db) {
       status = '',
     } = req.body;
 
+    const actionDate = moment().format('YYYY-MM-DD'); // When the user was promoted / accepted
+    const threeDayDeadline = moment().add(3, 'days').format('YYYY-MM-DD'); // Deadline for submitting secondary or enrollment fee
     const selectedApplicantsToUse = splitApplicantName(selectedApplicants);
     const selectedApplicantIds = selectedApplicantsToUse.map(applicant => applicant.id);
 
     const listId = resolveListId(status, program);
-    const mailChimpPayload = resolveMailClientPayload(selectedApplicantsToUse, listId, program);
+    const mailChimpPayload = resolveMailClientPayload(selectedApplicantsToUse, listId, program, threeDayDeadline);
 
     let dbPayload;
     if (status === 'secondary') {
-      dbPayload = {status, secondary: program}
+      dbPayload = {
+        status,
+        secondary: program,
+        secondaryDate: actionDate,
+        secondaryDeadline: threeDayDeadline,
+      }
+    } else if (status === 'accepted') {
+      dbPayload = {
+        status,
+        acceptedTo: program,
+        acceptedDate: actionDate,
+        enrollmentFeeDeadline: threeDayDeadline,
+      }
     } else if (status) {
       dbPayload = {status}
     }
@@ -109,8 +120,6 @@ module.exports = function routes(db) {
         })
         .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
     }
-
-
 
     addApplicantsToMailList(mailChimpPayload)
       .then(() => updateManyApplicants(selectedApplicantIds, myCollection, dbPayload))
@@ -134,13 +143,13 @@ module.exports = function routes(db) {
       definition = {},
       answers = [],
       hidden = {},
-      submitted_at = moment().format('MM-DD-YYYY'),
+      submitted_at = moment().format('YYYY-MM-DD'),
     } = form_response;
 
     const questions = definition.fields || [];
     const id = hidden.dbid || '';
     const status = 'secondary';
-    const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
+    const submitDate = moment.utc(submitted_at).format('YYYY-MM-DD');
 
     // validate the database id
     const isValidId = validate.test(id)
@@ -154,6 +163,7 @@ module.exports = function routes(db) {
     }
     if (isValidId) {
       const formResponse = mapAnswersToQuestions(typeformPayload);
+
       updateApplicant(myCollection, formResponse, id)
         .then(() => {
           console.log('DB tier 2 update is successful')
