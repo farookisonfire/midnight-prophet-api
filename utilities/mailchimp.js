@@ -41,7 +41,7 @@ function resolveListId(status, program) {
   return;
 }
 
-function resolveConfirmedListId(status, program) {
+function resolveConfirmedListId(program) {
   switch(program) {
     case 'healthInnovation':
       return lists.confirmedHealth;
@@ -49,7 +49,7 @@ function resolveConfirmedListId(status, program) {
       return lists.confirmedEducation;
     case 'serve':
       return lists.confirmedYouth;
-    case 'youth':
+    case 'youthEmpowerment':
       return lists.confirmedYouth;
     default:
       return;

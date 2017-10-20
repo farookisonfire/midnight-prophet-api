@@ -1,6 +1,10 @@
 const Router = require('express').Router;
 const fetch = require('node-fetch');
 const moment = require('moment');
+const {
+  sendTextMessage,
+  userSubmitEnrollmentFeeMsg,
+ } = require('../utilities/twilio');
 const stripe = require('../utilities/stripe');
 const handleEnrollmentFee = stripe.handleEnrollmentFee;
 
@@ -55,8 +59,11 @@ const secureRoutes = (db) => {
         applicantDetails.lastName = value['Last Name'];
         applicantDetails.id = value['_id'];
         applicantDetails.email = value['Email'];
-        return findOneProgram(selectedProgramId, programsCollection)
+        const applicantPhone = value['Mobile Phone Number'];
+        const messageToSend = userSubmitEnrollmentFeeMsg(applicantDetails.firstName);
+        return sendTextMessage(messageToSend, applicantPhone);
       })
+      .then(() => findOneProgram(selectedProgramId, programsCollection))
       .then((programDetails) => {
         const { typeId = '' } = programDetails;
         const resolvedListId = resolveConfirmedListId(typeId);
