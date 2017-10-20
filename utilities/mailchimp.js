@@ -10,6 +10,9 @@ const lists = {
   secondaryYouth: '892191e664',
   accepted: '213226583d',
   confirmed: '2338599b06',
+  confirmedHealth: '2474f944d3',
+  confirmedYouth: '54e14261f2',
+  confirmedEducation: 'bd6ca247ef',
 };
 
 function resolveListId(status, program) {
@@ -36,6 +39,21 @@ function resolveListId(status, program) {
     }
   }
   return;
+}
+
+function resolveConfirmedListId(status, program) {
+  switch(program) {
+    case 'healthInnovation':
+      return lists.confirmedHealth;
+    case 'education':
+      return lists.confirmedEducation;
+    case 'serve':
+      return lists.confirmedYouth;
+    case 'youth':
+      return lists.confirmedYouth;
+    default:
+      return;
+  }
 }
 
 function resolveMailClientPayloadOne(applicantDetails) {
@@ -103,4 +121,5 @@ module.exports = {
   resolveListId: resolveListId,
   addApplicantToMailList: addApplicantToMailList,
   addApplicantsToMailList: addApplicantsToMailList,
+  resolveConfirmedListId
 }
