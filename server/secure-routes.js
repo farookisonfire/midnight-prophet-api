@@ -6,16 +6,20 @@ const handleEnrollmentFee = stripe.handleEnrollmentFee;
 
 const database = require('../utilities/database');
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
+const COLLECTION_PROGRAMS = process.env.COLLECTION_PROGRAMS || 'v3Programs';
 const findOneAndUpdateApplicant = database.findOneAndUpdateApplicant;
+const findOneProgram = database.findOneProgram;
 const validate = database.validate;
 
 const mailchimp = require('../utilities/mailchimp');
 const resolveMailClientPayloadOne = mailchimp.resolveMailClientPayloadOne;
 const addApplicantToMailList = mailchimp.addApplicantToMailList;
+const resolveConfirmedListId = mailchimp.resolveConfirmedListId;
 
 const secureRoutes = (db) => {
   const router = new Router();
   const dbCollection = db.collection(COLLECTION);
+  const programsCollection = db.collection(COLLECTION_PROGRAMS);
 
   router.post('/:id', (req, res) => {    
     const id = req.params.id || '';
@@ -30,9 +34,8 @@ const secureRoutes = (db) => {
     const promotionDeadline = moment().add(16, 'days').format('YYYY-MM-DD');
     const finalDeadline = moment().add(90, 'days').format('YYYY-MM-DD');
 
-    const listId = mailchimp.lists.confirmed;
-
     if (isValidId) {
+      const applicantDetails = {};
       // make the charge
       handleEnrollmentFee(token, email, description, enrollmentFee)
       .then((charge) => {
@@ -48,16 +51,19 @@ const secureRoutes = (db) => {
       // TODO: move applicant from accepted to confirmed mailchimp list.
       .then((result) => {
         const { value = {} } = result;
-        const applicantDetails = {
-          firstName: value['First Name'],
-          lastName: value['Last Name'],
-          id: value['_id'],
-          email: value['Email'],
-        }
-        const mailClientPayload = resolveMailClientPayloadOne(applicantDetails);
-        return addApplicantToMailList(mailClientPayload, listId);
+        applicantDetails.firstName = value['First Name'];
+        applicantDetails.lastName = value['Last Name'];
+        applicantDetails.id = value['_id'];
+        applicantDetails.email = value['Email'];
+        return findOneProgram(selectedProgramId, programsCollection)
       })
-      .then((result) => {
+      .then((programDetails) => {
+        const { typeId = '' } = programDetails;
+        const resolvedListId = resolveConfirmedListId(typeId);
+        const mailClientPayload = resolveMailClientPayloadOne(applicantDetails);
+        return addApplicantToMailList(mailClientPayload, resolvedListId);
+      })
+      .then(() => {
         console.log('CHARGE MADE, APPLICANT UPDATE, APPLICANT ADD MAIL LIST - SUCCESS')
         return res.status(200).json({'payment':'success'})
       })
