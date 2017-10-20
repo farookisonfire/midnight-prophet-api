@@ -23,6 +23,10 @@ const userAcceptedMsg = (name) => {
   return `Hi ${name}, your Admissions result has been released via email. - One Heart Source Admissions`
 }
 
+const userSubmitEnrollmentFeeMsg = (name) => {
+  return `Hi ${name}, thank you for submitting your enrollment fee! Your position has been secured. - One Heart Source Admissions`
+}
+
 const sendTextMessage = (body, to) => {
   client.messages.create({
     body: body,
@@ -58,4 +62,5 @@ module.exports = {
   userPromotedToSecondaryMsg,
   userSubmitSecondaryMsg,
   userAcceptedMsg,
+  userSubmitEnrollmentFeeMsg
 };
