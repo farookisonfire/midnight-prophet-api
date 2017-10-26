@@ -25,6 +25,15 @@ const initialDataRoutes = (db) => {
       })
     })
 
+    router.get('/programs', (req, res) => {
+      programsCollection.find().toArray()
+      .then(programs => res.status(200).json(programs))
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).send('Unable to get initial data');
+      })
+    })
+
   return router;
 }
 
