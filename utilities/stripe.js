@@ -1,7 +1,7 @@
 var secret = process.env.STRIPE_SECRET_KEY || "sk_test_6m55BYyH2L1xa7j9uboViaNq";
 var stripe = require("stripe")(secret);
 
-const handleEnrollmentFee = (token, email, description, fee) => {
+const handleEnrollmentFee = (token, email, description, fee, chargeMetadata = {}) => {
   return new Promise((resolve, reject) => {
     stripe.customers.create({
       email: email,
@@ -9,15 +9,16 @@ const handleEnrollmentFee = (token, email, description, fee) => {
       source: token,
     })
     .then((customer) => {
-      console.log('CREATED A CUSTOMER ----> ', customer);
+      console.log('Create customer success ----> ', customer);
       return stripe.charges.create({
         amount: parseInt(fee) * 100,
         currency: 'usd',
         customer: customer.id,
+        metadata: chargeMetadata,
       });
     })
     .then((charge) => {
-      console.log('Program Secure Charge Success')
+      console.log('Create charge success ---->', charge)
       return resolve(charge)
     })
     .catch((error) => {
@@ -27,12 +28,13 @@ const handleEnrollmentFee = (token, email, description, fee) => {
   })
 }
 
-const chargeCustomer = (customerId, fee) => {
+const chargeCustomer = (customerId, fee, chargeMetadata = {}) => {
   return new Promise((resolve, reject) => {
     stripe.charges.create({
       amount: parseInt(fee) * 100,
       currency: 'usd',
       customer: customerId,
+      metadata: chargeMetadata
     })
     .then(charge => {
       console.log('charge success', charge)

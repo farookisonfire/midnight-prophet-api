@@ -13,6 +13,7 @@ const {
   findOneProgram,
   validate,
   updateApplicant,
+  incrementProgramConfirmed,
 } = database;
 
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
@@ -96,18 +97,24 @@ const programFeeRoutes = (db) => {
       const collectionToUse = fellow === 'true'?
           fellowshipCollection :
           applicantCollection;
+      const applicantDetails = {};
 
       return findOneApplicant(id, collectionToUse)
         .then(applicant => {
+          applicantDetails.selectedProgramId = applicant.selectedProgramId;
+          applicantDetails.firstName = applicant['First Name'];
+          applicantDetails.lastName = applicant['Last Name'];
+          applicantDetails.email = applicant["Email"];
           dbPayload.qualifyPromotion = checkQualifyPromotion(applicant.promotionDeadline)
         })
         .then(() => createCustomer(token, email, description))
         .then((customer) => {
           dbPayload.customer = customer;
           const { id = '' } = customer;
-          return chargeCustomer(id, programFee);
+          return chargeCustomer(id, programFee, applicantDetails);
         })
         .then(() => updateApplicant(collectionToUse, dbPayload, id))
+        .then(() => incrementProgramConfirmed(applicantDetails.selectedProgramId, programsCollection))
         .then(() => res.status(200).json({payment:"program fee success"}))
         .catch((err) => {
           console.log(err);

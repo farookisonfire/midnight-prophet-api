@@ -14,21 +14,11 @@ function storeApplicant(collection, formResponse) {
   })
 }
 
-function updateApplicant(collection, dbPayload, id) {
-  return new Promise((resolve, reject) => {
-    collection.update(
-      {_id: ObjectId(id)},
-      {$set: dbPayload},
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          reject(err);
-          return;
-        }
-        resolve(result);
-        return;
-    })
-  })
+const updateApplicant = (collection, dbPayload, id) => {
+  return collection.updateOne(
+    {_id: ObjectId(id)},
+    {$set: dbPayload}
+  );
 }
 
 function findOneAndUpdateApplicant(collection, dbPayload, id) {
@@ -67,12 +57,8 @@ function updateManyApplicants(applicantIds, collection, dbPayload) {
   })
 }
 
-function findOneApplicant(id, collection) {
-  return new Promise((resolve, reject) => {
-    collection.findOne({_id:ObjectId(id)})
-    .then((doc) => resolve(doc))
-    .catch((err) => reject(err));
-  })
+const findOneApplicant = (id, collection) => {
+  return collection.findOne({_id: ObjectId(id)});
 }
 
 function findOneProgram(programId, collection) {
@@ -81,6 +67,28 @@ function findOneProgram(programId, collection) {
     .then((doc) => resolve(doc))
     .catch((err) => reject(err));
   })
+}
+
+const findOneAndIncrementProgram = (programId, collection ) => {
+  return collection.findOneAndUpdate(
+    {id:programId},
+    {$inc: {enrolled: 1}},
+    {returnOriginal: false}
+  );
+};
+
+const incrementProgramEnrollment = (programId, collection) => {
+  return collection.updateOne(
+    {id: programId},
+    {$inc: {enrolled: 1}}
+  );
+}
+
+const incrementProgramConfirmed = (programId, collection) => {
+  return collection.updateOne(
+    {id: programId},
+    {$inc: {enrolled: -1, confirmed: 1}}
+  );
 }
 
 const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
@@ -93,4 +101,7 @@ module.exports = {
   findOneAndUpdateApplicant: findOneAndUpdateApplicant,
   findOneApplicant: findOneApplicant,
   findOneProgram: findOneProgram,
+  findOneAndIncrementProgram,
+  incrementProgramEnrollment,
+  incrementProgramConfirmed
 }
