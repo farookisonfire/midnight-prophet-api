@@ -1,24 +1,25 @@
 const Router = require('express').Router;
 const fetch = require('node-fetch');
 const moment = require('moment');
+const { handleEnrollmentFee } = require('../utilities/stripe');
 const {
   sendTextMessage,
   userSubmitEnrollmentFeeMsg,
  } = require('../utilities/twilio');
-const stripe = require('../utilities/stripe');
-const handleEnrollmentFee = stripe.handleEnrollmentFee;
+const {
+  validate,
+  findOneApplicant,
+  findOneAndIncrementProgram,
+  updateApplicant,
+} = require('../utilities/database');
+const {
+  resolveMailClientPayloadOne,
+  addApplicantToMailList,
+  resolveConfirmedListId,
+} = require('../utilities/mailchimp');
 
-const database = require('../utilities/database');
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
 const COLLECTION_PROGRAMS = process.env.COLLECTION_PROGRAMS || 'v3Programs';
-const findOneAndUpdateApplicant = database.findOneAndUpdateApplicant;
-const findOneProgram = database.findOneProgram;
-const validate = database.validate;
-
-const mailchimp = require('../utilities/mailchimp');
-const resolveMailClientPayloadOne = mailchimp.resolveMailClientPayloadOne;
-const addApplicantToMailList = mailchimp.addApplicantToMailList;
-const resolveConfirmedListId = mailchimp.resolveConfirmedListId;
 
 const secureRoutes = (db) => {
   const router = new Router();
@@ -40,8 +41,21 @@ const secureRoutes = (db) => {
 
     if (isValidId) {
       const applicantDetails = {};
-      // make the charge
-      handleEnrollmentFee(token, email, description, enrollmentFee)
+      const chargeMetadata = {};
+
+      findOneApplicant(id, dbCollection)
+      .then(applicant => {
+        applicantDetails.firstName = applicant['First Name'];
+        applicantDetails.lastName = applicant['Last Name'];
+        applicantDetails.id = applicant['_id'];
+        applicantDetails.email = applicant['Email'];
+        applicantDetails.applicantPhone = applicant['Mobile Phone Number'];
+        chargeMetadata.firstName = applicant['First Name'];
+        chargeMetadata.lastName = applicant['Last Name'];
+        chargeMetadata.email = applicant['Email'];
+        chargeMetadata.applicantPhone = applicant['Mobile Phone Number'];
+      })
+      .then(() => handleEnrollmentFee(token, email, description, enrollmentFee, chargeMetadata))
       .then((charge) => {
         const dbPayload = {
           status: 'confirmed',
@@ -50,22 +64,17 @@ const secureRoutes = (db) => {
           promotionDeadline,
           finalDeadline
         }
-        return findOneAndUpdateApplicant(dbCollection, dbPayload, id);
+        return updateApplicant(dbCollection, dbPayload, id);
       })
       // TODO: move applicant from accepted to confirmed mailchimp list.
-      .then((result) => {
-        const { value = {} } = result;
-        applicantDetails.firstName = value['First Name'];
-        applicantDetails.lastName = value['Last Name'];
-        applicantDetails.id = value['_id'];
-        applicantDetails.email = value['Email'];
-        const applicantPhone = value['Mobile Phone Number'];
+      .then(() => {
         const messageToSend = userSubmitEnrollmentFeeMsg(applicantDetails.firstName);
-        return sendTextMessage(messageToSend, applicantPhone);
+        return sendTextMessage(messageToSend, applicantDetails.applicantPhone);
       })
-      .then(() => findOneProgram(selectedProgramId, programsCollection))
+      .then(() => findOneAndIncrementProgram(selectedProgramId, programsCollection))
       .then((programDetails) => {
-        const { typeId = '' } = programDetails;
+        const { value = {} } = programDetails;
+        const { typeId = '' } = value;
         const resolvedListId = resolveConfirmedListId(typeId);
         const mailClientPayload = resolveMailClientPayloadOne(applicantDetails);
         return addApplicantToMailList(mailClientPayload, resolvedListId);
