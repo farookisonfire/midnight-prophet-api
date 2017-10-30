@@ -94,22 +94,24 @@ const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId
       email,
       firstName,
       lastName,
+      hbcu,
     } = applicant;
     
     return {
       method: 'POST',
       path: `lists/${listId}/members`,
       body: {
-      email_address:email, 
-      status:"subscribed",
-      merge_fields: {
-        FNAME: firstName,
-        LNAME: lastName,
-        DBID: id,
-        PTYPE: programTypeId,
-        DEADLINE: deadline,
-      }
-    },
+        email_address:email,
+        status:"subscribed",
+        merge_fields: {
+          FNAME: firstName,
+          LNAME: lastName,
+          DBID: id,
+          PTYPE: programTypeId,
+          DEADLINE: deadline,
+          HBCU: hbcu
+        }
+      },
     }
   }) 
 }
