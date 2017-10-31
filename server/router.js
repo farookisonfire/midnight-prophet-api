@@ -201,5 +201,36 @@ module.exports = function routes(db) {
     }
   })
 
+  router.post('/defer-enroll', (req, res) => {
+    const { form_response = {} } = req.body;
+    const {
+      definition = {},
+      answers = [],
+      submitted_at = moment().format('MM-DD-YYYY'),
+    } = form_response;
+
+    const refcode = 'defer-enroll';
+    const questions = definition.fields || [];
+    const status = 'defer-enroll';
+    const submitDate = moment.utc(submitted_at).format('MM-DD-YYYY');
+
+    const typeformPayload = {
+      refcode,
+      submitDate,
+      status,
+      questions,
+      answers,
+    }
+
+    const formResponse = mapAnswersToQuestions(typeformPayload);
+
+    storeApplicant(myCollection, formResponse)
+    .then(() => res.status(200).send('Applicant data added to DB. Slack Notified.'))
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).send(err)
+    });
+  })
+
   return router;
 };

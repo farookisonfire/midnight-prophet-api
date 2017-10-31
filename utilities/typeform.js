@@ -31,9 +31,14 @@ function mapAnswersToQuestions(typeformPayload) {
 
   map.status = status;
   map.secondaryProgram = secondaryProgram;
-  status === 'secondary' ?
-    map.secondarySubmitDate = submitDate :
+
+  if (status === 'secondary') {
+    map.secondarySubmitDate = submitDate;
+  } else if (status === 'defer-enroll') {
+    map.deferSubmitDate = submitDate;
+  } else {
     map.primarySubmitDate = submitDate;
+  }
 
   questions.map(question => {
     answers.map(answer => {
