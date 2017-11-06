@@ -27,6 +27,10 @@ const userSubmitEnrollmentFeeMsg = (name) => {
   return `Hi ${name}, thank you for submitting your enrollment fee! Your position has been secured. - One Heart Source Admissions`
 }
 
+const userSentInfo = (name) => {
+  return `Hi ${name}, we've just sent you some details via email regarding your program! - One Heart Source Admissions`
+}
+
 const sendTextMessage = (body, to) => {
   client.messages.create({
     body: body,
@@ -46,6 +50,8 @@ const sendManyTextMessages = (applicants, status) => {
         msgBody = userPromotedToSecondaryMsg(firstName);
       } else if (status === 'accepted') {
         msgBody = userAcceptedMsg(firstName);
+      } else if (status === 'info-health') {
+        msgBody = userSentInfo(firstName);
       } else {
         return;
       }
