@@ -13,6 +13,7 @@ const lists = {
   confirmedHealth: '2474f944d3',
   confirmedYouth: '54e14261f2',
   confirmedEducation: 'bd6ca247ef',
+  infoHealth: 'a91ff19844',
 };
 
 function resolveListId(status, program) {
@@ -37,6 +38,9 @@ function resolveListId(status, program) {
       default:
         return;
     }
+  }
+  if (status === 'info-health') {
+    return lists.infoHealth;
   }
   return;
 }
@@ -90,11 +94,11 @@ const addApplicantsToMailList = (mailPayload) => {
 const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId, deadline ) => {
   return selectedApplicants.map((applicant) => {
     const {
-      id,
-      email,
-      firstName,
-      lastName,
-      hbcu,
+      id = '',
+      email = '',
+      firstName = '',
+      lastName = '',
+      hbcu = '',
     } = applicant;
     
     return {
