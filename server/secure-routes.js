@@ -36,6 +36,7 @@ const secureRoutes = (db) => {
     } = req.body;
     const description = 'Enrollment Fee';
     const isValidId = validate.test(id);
+    const enrollDate = moment().format('YYYY-MM-DD');
     const promotionDeadline = moment().add(16, 'days').format('YYYY-MM-DD');
     const finalDeadline = moment().add(90, 'days').format('YYYY-MM-DD');
 
@@ -62,7 +63,8 @@ const secureRoutes = (db) => {
           customerNumber: charge.customer,
           selectedProgramId,
           promotionDeadline,
-          finalDeadline
+          finalDeadline,
+          enrollDate
         }
         return updateApplicant(dbCollection, dbPayload, id);
       })
