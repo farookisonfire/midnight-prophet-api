@@ -183,13 +183,31 @@ module.exports = function routes(db) {
    // APPLICANT WITHDRAW
   router.post('/withdraw', (req, res) => {
     const { form_response = {} } = req.body;
-    const { hidden = {} } = form_response;
+    const {
+      definition = {},
+      answers = [],
+      hidden = {},
+    } = form_response;
     const id = hidden.dbid || '';
-    const dbPayload = { status: "withdrawn" };
+    const questions = definition.fields || [];
     const isValidId = validate.test(id)
-    console.log('withdraw path hit', id)
+
+    const typeformPayload = { questions, answers };
+    const formResponse = mapAnswersToQuestions(typeformPayload);
+    const applicantDecision = formResponse['Please select the option that applies to you'];
+
+    let status;
+
+    if (applicantDecision && applicantDecision === 'Withdraw my enrollment.') {
+      status = 'confirmed-withdraw';
+    } else if (applicantDecision && applicantDecision === 'Defer my enrollment.') {
+      status = 'confirmed-defer'
+    } else {
+      status = 'withdrawn';
+    }
 
     if (isValidId) {
+      const dbPayload = { status };
       updateApplicant(myCollection, dbPayload, id)
       .then(() => res.status(200).send('Ok'))
       .catch((err) => {
