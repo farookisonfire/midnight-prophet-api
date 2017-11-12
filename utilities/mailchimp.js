@@ -14,17 +14,26 @@ const lists = {
   confirmedYouth: '54e14261f2',
   confirmedEducation: 'bd6ca247ef',
   infoHealth: 'a91ff19844',
+  confirmedDefer: 'cf84e33872',
+  confirmedWithdraw: '808197db04'
 };
 
 function resolveListId(status, program) {
   if (status === 'denied') {
     return lists.denied;
   }
-
   if (status === 'accepted') {
     return lists.accepted;
   }
-
+  if (status === 'info-health') {
+    return lists.infoHealth;
+  }
+  if (status === 'defer') {
+    return lists.confirmedDefer;
+  }
+  if (status === 'withdraw') {
+    return lists.confirmedWithdraw;
+  }
   if (status === 'secondary' && program) {
     switch(program) {
       case 'healthInnovation':
@@ -38,9 +47,6 @@ function resolveListId(status, program) {
       default:
         return;
     }
-  }
-  if (status === 'info-health') {
-    return lists.infoHealth;
   }
   return;
 }

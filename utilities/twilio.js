@@ -31,6 +31,10 @@ const userSentInfo = (name) => {
   return `Hi ${name}, we've just sent you some details via email regarding your program! - One Heart Source Admissions`
 }
 
+const userSentDeferWithdraw = (name) => {
+  return `Hi ${name}, we've just sent you some details via email regarding your deferral/withdrawal! - One Heart Source Admissions`
+}
+
 const sendTextMessage = (body, to) => {
   client.messages.create({
     body: body,
@@ -52,6 +56,8 @@ const sendManyTextMessages = (applicants, status) => {
         msgBody = userAcceptedMsg(firstName);
       } else if (status === 'info-health') {
         msgBody = userSentInfo(firstName);
+      } else if (status === 'defer' || status === 'withdraw') {
+        msgBody = userSentDeferWithdraw(firstName);
       } else {
         return;
       }
@@ -68,5 +74,6 @@ module.exports = {
   userPromotedToSecondaryMsg,
   userSubmitSecondaryMsg,
   userAcceptedMsg,
-  userSubmitEnrollmentFeeMsg
+  userSubmitEnrollmentFeeMsg,
+  userSentDeferWithdraw
 };
