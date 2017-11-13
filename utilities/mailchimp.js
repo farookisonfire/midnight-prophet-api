@@ -14,8 +14,7 @@ const lists = {
   confirmedYouth: '54e14261f2',
   confirmedEducation: 'bd6ca247ef',
   infoHealth: 'a91ff19844',
-  confirmedDefer: 'cf84e33872',
-  confirmedWithdraw: '808197db04'
+  confirmedDeferWithdraw: '808197db04',
 };
 
 function resolveListId(status, program) {
@@ -28,11 +27,8 @@ function resolveListId(status, program) {
   if (status === 'info-health') {
     return lists.infoHealth;
   }
-  if (status === 'defer') {
-    return lists.confirmedDefer;
-  }
-  if (status === 'withdraw') {
-    return lists.confirmedWithdraw;
+  if (status === 'defer' || status === 'withdraw') {
+    return lists.confirmedDeferWithdraw;
   }
   if (status === 'secondary' && program) {
     switch(program) {
