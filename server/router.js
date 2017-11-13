@@ -197,6 +197,7 @@ module.exports = function routes(db) {
     const applicantDecision = formResponse['Please select the option that applies to you'];
 
     let status;
+    const deferWithdrawOn = moment().format('YYYY-MM-DD');
 
     if (applicantDecision && applicantDecision === 'Withdraw my enrollment.') {
       status = 'confirmed-withdraw';
@@ -207,7 +208,7 @@ module.exports = function routes(db) {
     }
 
     if (isValidId) {
-      const dbPayload = { status };
+      const dbPayload = { status, deferWithdrawOn };
       updateApplicant(myCollection, dbPayload, id)
       .then(() => res.status(200).send('Ok'))
       .catch((err) => {
