@@ -22,8 +22,8 @@ const confirmedRoutes = (db) => {
       status = '',
     } = req.body;
 
-  const deferWithdrawDate = moment().format('YYYY-MM-DD');
-  const dbPayload = {status, deferWithdrawDate};
+  const sentDeferWithdrawEmail = moment().format('YYYY-MM-DD');
+  const dbPayload = {sentDeferWithdrawEmail};
 
   const selectedApplicantsToUse = splitApplicantName(selectedApplicants);
   const selectedApplicantIds = selectedApplicantsToUse.map(applicant => applicant.id);
