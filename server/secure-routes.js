@@ -37,7 +37,7 @@ const secureRoutes = (db) => {
     const description = 'Enrollment Fee';
     const isValidId = validate.test(id);
     const enrollDate = moment().format('YYYY-MM-DD');
-    const promotionDeadline = moment().add(16, 'days').format('YYYY-MM-DD');
+    const promotionDeadline = moment().add(10, 'days').format('YYYY-MM-DD');
     const finalDeadline = moment().add(90, 'days').format('YYYY-MM-DD');
 
     if (isValidId) {
