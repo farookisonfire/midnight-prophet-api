@@ -32,7 +32,7 @@ const confirmedRoutes = (db) => {
 
   addApplicantsToMailList(mailChimpPayload)
     .then(() => updateManyApplicants(selectedApplicantIds, applicantCollection, dbPayload))
-    // .then(() => sendManyTextMessages(selectedApplicantsToUse, status)) // commented out until we are actually sending an email with the form. 
+    .then(() => sendManyTextMessages(selectedApplicantsToUse, status))
     .then(() => res.status(200).send('Applicant sent defer withdraw success.'))
     .catch((err) => {
       console.log('Error - send info fail. ', err);
