@@ -2,6 +2,7 @@ const Router = require('express').Router;
 const moment = require('moment');
 const stripe = require('../utilities/stripe');
 const database = require('../utilities/database');
+const { numToUSD } = require('../utilities/utils');
 
 const {
   chargeCustomer,
@@ -82,7 +83,9 @@ const programFeeRoutes = (db) => {
   // handle program fee payment - need to make distinction between firstYear and Fellow
   router.post('/:id', (req, res) => {
     const id = req.params.id || '';
-    const programFee = req.body.enrollmentFee || '';
+    const programFee = req.body.enrollmentFee;
+    const taxDeductibleAmount = programFee * .8;
+    const taxDeductibleTotal = numToUSD(taxDeductibleAmount);
     const token = req.body.token.id;
     const email = req.body.token.email;
     const description = 'Program Fee Payment';
@@ -111,7 +114,7 @@ const programFeeRoutes = (db) => {
         .then((customer) => {
           dbPayload.customer = customer;
           const { id = '' } = customer;
-          return chargeCustomer(id, programFee, applicantDetails);
+          return chargeCustomer(id, programFee, applicantDetails, email, taxDeductibleTotal);
         })
         .then(() => updateApplicant(collectionToUse, dbPayload, id))
         .then(() => incrementProgramConfirmed(applicantDetails.selectedProgramId, programsCollection))

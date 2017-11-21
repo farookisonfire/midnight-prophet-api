@@ -28,13 +28,15 @@ const handleEnrollmentFee = (token, email, description, fee, chargeMetadata = {}
   })
 }
 
-const chargeCustomer = (customerId, fee, chargeMetadata = {}) => {
+const chargeCustomer = (customerId, fee, chargeMetadata = {}, receiptEmail, taxDeductibleAmount) => {
   return new Promise((resolve, reject) => {
     stripe.charges.create({
       amount: parseInt(fee) * 100,
       currency: 'usd',
       customer: customerId,
-      metadata: chargeMetadata
+      metadata: chargeMetadata,
+      receipt_email: receiptEmail,
+      description: generateReceipt(taxDeductibleAmount)
     })
     .then(charge => {
       console.log('charge success', charge)
@@ -89,6 +91,22 @@ const retrieveCustomerCharges = (customerId) => {
     )
   })
 }
+
+const generateReceipt = (amount) =>(`
+    Note for US residents:
+    As One Heart Source is a registered 501(c)(3) non-profit organization, your contribution is tax-deductible in accordance with the IRS Nonprofit Tax Guidelines. If you would like to claim a tax deduction, this serves as your tax receipt and 88% of your contribution is tax-deductible.
+
+    Maximum Tax Deductible Amount: ${amount}. 
+    
+    One Heart Source EIN:  80-0151663
+
+    Contact information:
+    Name: One Heart Source
+    Contact Name:  John Freedman
+    Address: 1443 E. Washington Blvd., #179, Pasadena, CA 91104  
+
+    Thank you!
+`);
 
 module.exports = {
   handleEnrollmentFee,
