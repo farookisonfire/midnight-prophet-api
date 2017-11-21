@@ -23,6 +23,14 @@ const splitApplicantName = (applicants) => {
   })
 }
 
+const numToUSD = (num) => {
+  return num.toLocaleString('en-US', {
+    style:'currency',
+    currency: 'USD'
+  });
+}
+
 module.exports = {
   splitApplicantName: splitApplicantName,
+  numToUSD
 }
