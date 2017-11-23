@@ -96,8 +96,8 @@ const generateReceipt = (amount) =>(`
     Note for US residents:
     As One Heart Source is a registered 501(c)(3) non-profit organization, your contribution is tax-deductible in accordance with the IRS Nonprofit Tax Guidelines. If you would like to claim a tax deduction, this serves as your tax receipt and 88% of your contribution is tax-deductible.
 
-    Maximum Tax Deductible Amount: ${amount}. 
-    
+    Maximum Tax Deductible Amount: ${amount}.
+
     One Heart Source EIN:  80-0151663
 
     Contact information:
