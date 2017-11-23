@@ -5,7 +5,8 @@ const splitApplicantName = (applicants) => {
       id,
       email,
       phone,
-      hbcu
+      hbcu,
+      secondaryProgram
     } = applicant;
 
     const applicantName = name.split(' ');
@@ -18,7 +19,8 @@ const splitApplicantName = (applicants) => {
       id,
       email,
       phone,
-      hbcu
+      hbcu,
+      secondaryProgram
     }
   })
 }

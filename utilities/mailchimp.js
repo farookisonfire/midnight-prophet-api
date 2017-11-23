@@ -15,6 +15,9 @@ const lists = {
   confirmedEducation: 'bd6ca247ef',
   infoHealth: 'a91ff19844',
   confirmedDeferWithdraw: '808197db04',
+  reminderSecondaryHealth: '4b39957dad',
+  reminderSecondaryYouth: '0330455789',
+  reminderSecondaryEducation: '1ecee0a13d'
 };
 
 function resolveListId(status, program) {
@@ -26,6 +29,20 @@ function resolveListId(status, program) {
   }
   if (status === 'info-health') {
     return lists.infoHealth;
+  }
+  if (status === 'reminder-secondary') {
+    switch(program) {
+      case 'healthInnovation':
+        return lists.reminderSecondaryHealth;
+      case 'youthEmpowerment':
+        return lists.reminderSecondaryYouth;
+      case 'education':
+        return lists.reminderSecondaryEducation;
+      case 'hbcu':
+        return 'hbcu'
+      default:
+        return;
+    }
   }
   if (status === 'defer' || status === 'withdraw') {
     return lists.confirmedDeferWithdraw;
@@ -94,32 +111,63 @@ const addApplicantsToMailList = (mailPayload) => {
 };
 
 const resolveMailClientPayloadMany = ( selectedApplicants, listId, programTypeId, deadline ) => {
-  return selectedApplicants.map((applicant) => {
-    const {
-      id = '',
-      email = '',
-      firstName = '',
-      lastName = '',
-      hbcu = '',
-    } = applicant;
-    
-    return {
-      method: 'POST',
-      path: `lists/${listId}/members`,
-      body: {
-        email_address:email,
-        status:"subscribed",
-        merge_fields: {
-          FNAME: firstName,
-          LNAME: lastName,
-          DBID: id,
-          PTYPE: programTypeId,
-          DEADLINE: deadline,
-          HBCU: hbcu
+  if (listId === 'hbcu') { // for secondary reminder, if HBCU need unique listIds for each applicant
+    return selectedApplicants.map((applicant) => {
+      const {
+        id = '',
+        email = '',
+        firstName = '',
+        lastName = '',
+        hbcu = '',
+        secondaryProgram = ''
+      } = applicant;
+
+      const reminderListId = resolveListId('reminder-secondary', secondaryProgram)
+      return {
+        method: 'POST',
+        path: `lists/${reminderListId}/members`,
+        body: {
+          email_address:email,
+          status:"subscribed",
+          merge_fields: {
+            FNAME: firstName,
+            LNAME: lastName,
+            DBID: id,
+            PTYPE: programTypeId,
+            DEADLINE: deadline,
+            HBCU: hbcu
+          }
+        },
+      }
+    })
+  } else {
+      return selectedApplicants.map((applicant) => {
+        const {
+          id = '',
+          email = '',
+          firstName = '',
+          lastName = '',
+          hbcu = '',
+        } = applicant;
+
+        return {
+          method: 'POST',
+          path: `lists/${listId}/members`,
+          body: {
+            email_address:email,
+            status:"subscribed",
+            merge_fields: {
+              FNAME: firstName,
+              LNAME: lastName,
+              DBID: id,
+              PTYPE: programTypeId,
+              DEADLINE: deadline,
+              HBCU: hbcu
+            }
+          },
         }
-      },
-    }
-  }) 
+      })
+  }
 }
 
 module.exports = {

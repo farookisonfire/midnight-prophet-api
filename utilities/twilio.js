@@ -35,6 +35,10 @@ const userSentDeferWithdraw = (name) => {
   return `Hi ${name}, we've just sent you some details via email regarding your deferral/withdrawal! - One Heart Source Admissions`
 }
 
+const userSentReminderSecondary = (name) => {
+  return `Hi ${name}, you still have time to complete your secondary application! For details, please check your email (remember to check your spam/junk folders) - One Heart Source Admissions`
+}
+
 const sendTextMessage = (body, to) => {
   client.messages.create({
     body: body,
@@ -58,6 +62,8 @@ const sendManyTextMessages = (applicants, status) => {
         msgBody = userSentInfo(firstName);
       } else if (status === 'defer' || status === 'withdraw') {
         msgBody = userSentDeferWithdraw(firstName);
+      } else if (status === 'reminder-secondary') {
+        msgBody = userSentReminderSecondary(firstName);
       } else {
         return;
       }
