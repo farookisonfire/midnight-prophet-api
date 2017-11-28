@@ -84,7 +84,7 @@ const programFeeRoutes = (db) => {
   router.post('/:id', (req, res) => {
     const id = req.params.id || '';
     const programFee = req.body.enrollmentFee;
-    const taxDeductibleAmount = programFee * .8;
+    const taxDeductibleAmount = programFee * .88;
     const taxDeductibleTotal = numToUSD(taxDeductibleAmount);
     const token = req.body.token.id;
     const email = req.body.token.email;
