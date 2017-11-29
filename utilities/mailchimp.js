@@ -17,7 +17,8 @@ const lists = {
   confirmedDeferWithdraw: '808197db04',
   reminderSecondaryHealth: '4b39957dad',
   reminderSecondaryYouth: '0330455789',
-  reminderSecondaryEducation: '1ecee0a13d'
+  reminderSecondaryEducation: '1ecee0a13d',
+  acceptedBlitz: 'e64635e79b'
 };
 
 function resolveListId(status, program) {
@@ -106,6 +107,27 @@ function addApplicantToMailList(mailPayload, listId) {
   })
 }
 
+const readList = (listId) => {
+  return mailchimp.get({
+    path: `lists/${listId}/members`
+  });
+};
+
+const resolveCampaignListId = (campaignName) => {
+  switch(campaignName) {
+    case 'blitz':
+      return lists.acceptedBlitz;
+    default:
+      return;
+  }
+};
+
+const removeApplicantFromList = (memberId, listId) => {
+  return mailchimp.delete({
+    path: `lists/${listId}/members/${memberId}`
+  })
+};
+
 const addApplicantsToMailList = (mailPayload) => {
   return mailchimp.batch(mailPayload);
 };
@@ -177,5 +199,8 @@ module.exports = {
   resolveListId: resolveListId,
   addApplicantToMailList: addApplicantToMailList,
   addApplicantsToMailList: addApplicantsToMailList,
-  resolveConfirmedListId
+  resolveConfirmedListId,
+  readList,
+  resolveCampaignListId,
+  removeApplicantFromList
 }

@@ -16,6 +16,9 @@ const {
   resolveMailClientPayloadOne,
   addApplicantToMailList,
   resolveConfirmedListId,
+  readList,
+  resolveCampaignListId,
+  removeApplicantFromList
 } = require('../utilities/mailchimp');
 
 const COLLECTION = process.env.COLLECTION || 'v5Collection';
@@ -33,6 +36,7 @@ const secureRoutes = (db) => {
     const {
       selectedProgramId = '',
       enrollmentFee = '',
+      campaign = '',
     } = req.body;
     const description = 'Enrollment Fee';
     const isValidId = validate.test(id);
@@ -43,6 +47,19 @@ const secureRoutes = (db) => {
     if (isValidId) {
       const applicantDetails = {};
       const chargeMetadata = {};
+
+      if(campaign) { // if enrollment is from a payment campaign, remove applicant from the automation list.
+        const campaignListId = resolveCampaignListId(campaign);
+        readList(campaignListId)
+          .then(listData => {
+            const { members = [] } = listData;
+            let targetMember = members.filter(member => member.merge_fields.DBID === id);
+            targetMember = targetMember.length ? targetMember[0] : {};
+            return targetMember.id || '';
+          })
+          .then(memberId => removeApplicantFromList(memberId, campaignListId))
+          .catch(err => console.log('Unable to remove subscriber from campaign specific list', err));
+      }
 
       findOneApplicant(id, dbCollection)
       .then(applicant => {
