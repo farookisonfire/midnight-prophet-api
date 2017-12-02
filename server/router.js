@@ -1,7 +1,7 @@
 const Router = require('express').Router;
 const fetch = require('node-fetch');
 const mapAnswersToQuestions = require('../utilities/typeform');
-const updateSlack = require('../utilities/slack');
+const { updateSlack } = require('../utilities/slack');
 const moment = require('moment');
 const database = require('../utilities/database');
 const mailchimp = require('../utilities/mailchimp');
