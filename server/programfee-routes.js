@@ -3,6 +3,11 @@ const moment = require('moment');
 const stripe = require('../utilities/stripe');
 const database = require('../utilities/database');
 const { numToUSD } = require('../utilities/utils');
+const {
+  notifySlack,
+  slackNotificationTypes,
+  slackNotificationURLs
+} = require('../utilities/slack');
 
 const {
   chargeCustomer,
@@ -138,13 +143,21 @@ const programFeeRoutes = (db) => {
       const collectionToUse = fellow === 'true'?
           fellowshipCollection :
           applicantCollection;
+      const applicantDetails = {};
 
-        updateApplicant(collectionToUse, dbPayload, id)
-        .then(() => res.status(200).json({payment:"Payment plan enrollment success"}))
-        .catch((err) => {
-          console.log('error', err);
-          return res.status(500).send('Payment plan enrollment fail')
-        })
+      return findOneApplicant(id, collectionToUse)
+      .then(applicant => {
+        applicantDetails.firstName = applicant['First Name'];
+        applicantDetails.lastName = applicant['Last Name'];
+        applicantDetails.email = applicant["Email"];
+      })
+      .then(() => notifySlack(slackNotificationTypes.paymentPlan, applicantDetails))
+      .then(() => updateApplicant(collectionToUse, dbPayload, id))
+      .then(() => res.status(200).json({payment:"Payment plan enrollment success"}))
+      .catch((err) => {
+        console.log('error', err);
+        return res.status(500).send('Payment plan enrollment fail')
+      })
     } else {
       return res.status(500).json({msg: "Invalid user id"})
     }
