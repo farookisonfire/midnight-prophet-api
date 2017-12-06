@@ -121,9 +121,19 @@ module.exports = function routes(db) {
         .catch((err) => console.log('caught after updateApplicant and addToMailList', err));
     }
 
+    console.log('Request Body', req.body);
+    console.log('Mailchimp Payload', mailChimpPayload);
+    console.log('db payload', dbPayload);
+
     addApplicantsToMailList(mailChimpPayload)
-      .then(() => updateManyApplicants(selectedApplicantIds, myCollection, dbPayload))
-      .then(() => sendManyTextMessages(selectedApplicantsToUse, status))
+      .then(() => {
+        console.log('added applicants to mailList')
+        return updateManyApplicants(selectedApplicantIds, myCollection, dbPayload)
+      })
+      .then(() => {
+        console.log('updated applicants in db')
+        return sendManyTextMessages(selectedApplicantsToUse, status)
+      })
       .then(() => {
         console.log('Applicants added to DB and MailList');
         return res.status(200).send('Applicants added to db and mail list.');
