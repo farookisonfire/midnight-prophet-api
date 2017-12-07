@@ -14,7 +14,7 @@ const initialDataRoutes = (db) => {
     const data = {};
     applicantCollection.find().toArray()
       .then(applicants => data.applicants = applicants)
-      .then(() => programsCollection.find().toArray())
+      .then(() => programsCollection.find().sort({order:1}).toArray())
       .then(programs => data.programs = programs)
       .then(() => fellowsCollection.find().toArray())
       .then(fellows => data.fellows = fellows)
@@ -26,11 +26,11 @@ const initialDataRoutes = (db) => {
     })
 
     router.get('/programs', (req, res) => {
-      programsCollection.find().toArray()
+      programsCollection.find().sort({order:1}).toArray()
       .then(programs => res.status(200).json(programs))
       .catch((err) => {
-        console.log(err);
-        return res.status(500).send('Unable to get initial data');
+        console.log('error at GET /programs', err);
+        res.status(500).send('Unable to get initial data')
       })
     })
 
