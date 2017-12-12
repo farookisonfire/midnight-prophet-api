@@ -82,7 +82,9 @@ const programFeeRoutes = (db) => {
             console.log(err);
             res.status(500).send('Unable to find applicant and program')
           })
-      }
+      } else {
+      return res.status(500).json({msg: "Invalid user id"})
+    }
   })
 
   // handle program fee payment - need to make distinction between firstYear and Fellow

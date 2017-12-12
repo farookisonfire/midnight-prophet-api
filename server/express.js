@@ -11,6 +11,7 @@ const smsRoutes = require('./sms-routes');
 const infoRoutes = require('./info-routes');
 const confirmedRoutes = require('./confirmed-routes');
 const reminderRoutes = require('./reminder-routes');
+const applicantRoutes = require('./applicant-routes');
 
 module.exports = function createApp(db) {
   const app = express();
@@ -18,6 +19,7 @@ module.exports = function createApp(db) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use('/sms', bodyParser.urlencoded({ extended:false }), smsRoutes());
+  app.use('/api/applicant', applicantRoutes(db));
   app.use('/api/applicants', routes(db));
   app.use('/api/initial-data', initialDataRoutes(db));
   app.use('/donation', donationRoutes());

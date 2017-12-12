@@ -11,6 +11,8 @@ const {
   findOneApplicant,
   findOneAndIncrementProgram,
   updateApplicant,
+  findOneAndUpdateApplicant,
+  findOneAndAddProgramWaitlist
 } = require('../utilities/database');
 const {
   resolveMailClientPayloadOne,
@@ -26,9 +28,9 @@ const COLLECTION_PROGRAMS = process.env.COLLECTION_PROGRAMS || 'v3Programs';
 
 const secureRoutes = (db) => {
   const router = new Router();
-  const dbCollection = db.collection(COLLECTION);
+  const applicantCollection = db.collection(COLLECTION);
   const programsCollection = db.collection(COLLECTION_PROGRAMS);
-
+  
   router.post('/:id', (req, res) => {    
     const id = req.params.id || '';
     const token = req.body.token.id;
@@ -61,7 +63,7 @@ const secureRoutes = (db) => {
           .catch(err => console.log('Unable to remove subscriber from campaign specific list', err));
       }
 
-      findOneApplicant(id, dbCollection)
+      findOneApplicant(id, applicantCollection)
       .then(applicant => {
         applicantDetails.firstName = applicant['First Name'];
         applicantDetails.lastName = applicant['Last Name'];
@@ -83,7 +85,7 @@ const secureRoutes = (db) => {
           finalDeadline,
           enrollDate
         }
-        return updateApplicant(dbCollection, dbPayload, id);
+        return updateApplicant(applicantCollection, dbPayload, id);
       })
       // TODO: move applicant from accepted to confirmed mailchimp list.
       .then(() => {
@@ -110,6 +112,27 @@ const secureRoutes = (db) => {
       return res.status(500).send('Transaction rejected. The user ID is invalid.')
     }
   })
+
+  router.put('/waitlist/:programId/:id', (req, res) => {
+    const selectedProgramId = req.params.programId || '';
+    const applicantId = req.params.id;
+    const dbApplicantPayload = { status: 'waitlist', selectedProgramId };
+
+    return findOneAndUpdateApplicant(applicantCollection, dbApplicantPayload, applicantId)
+      .then((applicantData) => {
+        const applicant = applicantData.value || {};
+        return {
+          firstName: applicant['First Name'],
+          lastName: applicant['Last Name'],
+          email: applicant['Email']
+        }
+      })
+      .then(dbProgramPayload => 
+        findOneAndAddProgramWaitlist(programsCollection, dbProgramPayload, selectedProgramId))
+      .then(program => {
+        return res.status(200).send('Applicant added to waitlist.');
+      })
+  });
 
   return router;
 }
