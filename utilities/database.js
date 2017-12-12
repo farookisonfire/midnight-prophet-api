@@ -22,21 +22,11 @@ const updateApplicant = (collection, dbPayload, id) => {
 }
 
 function findOneAndUpdateApplicant(collection, dbPayload, id) {
-  return new Promise((resolve, reject) => {
-    collection.findOneAndUpdate(
-      {_id: ObjectId(id)},
-      {$set: dbPayload},
-      {returnOriginal: false},
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          reject();
-          return;
-        }
-        resolve(result);
-        return;
-    })
-  })
+  return collection.findOneAndUpdate(
+    {_id: ObjectId(id)},
+    {$set: dbPayload},
+    {returnOriginal: false}
+  );
 }
 
 function updateManyApplicants(applicantIds, collection, dbPayload) {
@@ -67,6 +57,14 @@ function findOneProgram(programId, collection) {
     .then((doc) => resolve(doc))
     .catch((err) => reject(err));
   })
+}
+
+const findOneAndAddProgramWaitlist = (collection, dbPayload, id) => {
+  return collection.findOneAndUpdate(
+    {id: id},
+    {$push: {waitlist: dbPayload}},
+    {returnOriginal: false}
+  );
 }
 
 const findOneAndIncrementProgram = (programId, collection ) => {
@@ -103,5 +101,6 @@ module.exports = {
   findOneProgram: findOneProgram,
   findOneAndIncrementProgram,
   incrementProgramEnrollment,
-  incrementProgramConfirmed
+  incrementProgramConfirmed,
+  findOneAndAddProgramWaitlist
 }
