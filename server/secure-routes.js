@@ -121,7 +121,6 @@ const secureRoutes = (db) => {
     return findOneAndUpdateApplicant(applicantCollection, dbApplicantPayload, applicantId)
       .then((applicantData) => {
         const applicant = applicantData.value || {};
-        console.log('THE APPLICANT', applicant);
         return {
           firstName: applicant['First Name'],
           lastName: applicant['Last Name'],
@@ -131,9 +130,7 @@ const secureRoutes = (db) => {
       .then(dbProgramPayload => 
         findOneAndAddProgramWaitlist(programsCollection, dbProgramPayload, selectedProgramId))
       .then(program => {
-        console.log('this is the program after adding the applicant to waitlist:', program);
-        return res.status(200).send(program);
-        // need to return the waitlist length to the client;
+        return res.status(200).send('Applicant added to waitlist.');
       })
   });
 
