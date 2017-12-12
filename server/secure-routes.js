@@ -46,8 +46,6 @@ const secureRoutes = (db) => {
     const promotionDeadline = moment().add(10, 'days').format('YYYY-MM-DD');
     const finalDeadline = moment().add(90, 'days').format('YYYY-MM-DD');
 
-    console.log('secure route hit', selectedProgramId, req.body)
-
     if (isValidId) {
       const applicantDetails = {};
       const chargeMetadata = {};
