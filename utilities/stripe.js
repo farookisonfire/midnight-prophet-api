@@ -40,8 +40,7 @@ const handleClippersTicketPurchase = (token, orderDetails) => {
   })
   .then(customer =>
     stripe.charges.create({
-      amount: 50,
-      // amount: parseInt(amount) * 100,
+      amount: parseInt(orderTotal) * 100,
       description: 'LA Clippers vs. OKC Thunder - Jan. 4',
       currency: 'usd',
       customer: customer.id,
