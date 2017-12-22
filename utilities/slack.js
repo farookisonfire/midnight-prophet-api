@@ -3,17 +3,22 @@ const fetch = require('node-fetch');
 const SLACK_URL = process.env.SLACK_URL || '';
 
 const slackNotificationTypes = {
-  paymentPlan: 'paymentPlan'
+  paymentPlan: 'paymentPlan',
+  clippersTicket: 'clippersTicket'
 }
 
 const slackNotificationURLs = {
-  paymentPlan: process.env.SLACK_FINANCE_CHANNEL
+  paymentPlan: process.env.SLACK_FINANCE_CHANNEL,
+  clippersTicket: process.env.SLACK_CLIPPERS_CHANNEL
 }
 
 const slackNotifications = (applicantDetails = {}) => {
   return {
     paymentPlan: JSON.stringify({
       text: `*________ Payment Plan Notification: ________*\nFirst Name: ${applicantDetails.firstName}\nLast Name: ${applicantDetails.lastName}\nEmail:${applicantDetails.email}`
+    }),
+    clippersTicket: JSON.stringify({
+      text: `*________ Clippers Ticket Notification: ________*\nName: ${applicantDetails.name}\nEmail: ${applicantDetails.email}\nLevel: ${applicantDetails.level}\nSection: ${applicantDetails.section}\nTickets: ${applicantDetails.numTickets}\nOrder Total: $${applicantDetails.orderTotal}`
     })
   }
 }

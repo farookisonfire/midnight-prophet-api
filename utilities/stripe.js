@@ -28,6 +28,28 @@ const handleEnrollmentFee = (token, email, description, fee, chargeMetadata = {}
   })
 }
 
+const handleClippersTicketPurchase = (token, orderDetails) => {
+  const {
+    email,
+    orderTotal,
+  } = orderDetails
+
+  return stripe.customers.create({
+    email: email,
+    source: token
+  })
+  .then(customer =>
+    stripe.charges.create({
+      amount: 50,
+      // amount: parseInt(amount) * 100,
+      description: 'LA Clippers vs. OKC Thunder - Jan. 4',
+      currency: 'usd',
+      customer: customer.id,
+      receipt_email: email,
+      metadata: orderDetails,
+    }));
+};
+
 const chargeCustomer = (customerId, fee, chargeMetadata = {}, receiptEmail, taxDeductibleAmount) => {
   return new Promise((resolve, reject) => {
     stripe.charges.create({
@@ -114,4 +136,5 @@ module.exports = {
   chargeCustomer,
   retrieveCustomerCharges,
   createCustomer,
+  handleClippersTicketPurchase
 }

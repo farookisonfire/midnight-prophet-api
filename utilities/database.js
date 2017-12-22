@@ -89,6 +89,14 @@ const incrementProgramConfirmed = (programId, collection) => {
   );
 }
 
+const decrementSectionTickets = (id, collection, amount) => {
+  const numTickets = parseInt(amount);
+  return collection.updateOne(
+    {sectionId: id},
+    {$inc: {tickets: -numTickets}}
+  );
+}
+
 const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
 
 module.exports = {
@@ -102,5 +110,6 @@ module.exports = {
   findOneAndIncrementProgram,
   incrementProgramEnrollment,
   incrementProgramConfirmed,
-  findOneAndAddProgramWaitlist
+  findOneAndAddProgramWaitlist,
+  decrementSectionTickets
 }
