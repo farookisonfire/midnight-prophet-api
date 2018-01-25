@@ -15,7 +15,7 @@ const infoRoutes = (db) => {
   const router = new Router();
   const applicantCollection = db.collection(COLLECTION_APPLICANTS);
 
-  router.put('/health', (req, res) => {
+  router.put('/', (req, res) => {
   const {
     selectedApplicants = [],
     program = '',

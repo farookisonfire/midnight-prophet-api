@@ -14,6 +14,7 @@ const lists = {
   confirmedYouth: '54e14261f2',
   confirmedEducation: 'bd6ca247ef',
   infoHealth: 'a91ff19844',
+  infoYouth: 'baa26c2d63',
   confirmedDeferWithdraw: '808197db04',
   reminderSecondaryHealth: '4b39957dad',
   reminderSecondaryYouth: '0330455789',
@@ -30,6 +31,9 @@ function resolveListId(status, program) {
   }
   if (status === 'info-health') {
     return lists.infoHealth;
+  }
+  if (status === 'info-youth') {
+    return lists.infoYouth;
   }
   if (status === 'reminder-secondary') {
     switch(program) {
