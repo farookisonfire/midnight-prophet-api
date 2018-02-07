@@ -1,32 +1,26 @@
 var secret = process.env.STRIPE_SECRET_KEY || "sk_test_6m55BYyH2L1xa7j9uboViaNq";
 var stripe = require("stripe")(secret);
 
-const handleEnrollmentFee = (token, email, description, fee, chargeMetadata = {}) => {
-  return new Promise((resolve, reject) => {
-    stripe.customers.create({
-      email: email,
-      description: description,
-      source: token,
-    })
-    .then((customer) => {
-      console.log('Create customer success ----> ', customer);
-      return stripe.charges.create({
-        amount: parseInt(fee) * 100,
-        currency: 'usd',
-        customer: customer.id,
-        metadata: chargeMetadata,
-      });
-    })
-    .then((charge) => {
-      console.log('Create charge success ---->', charge)
-      return resolve(charge)
-    })
-    .catch((error) => {
-      console.log(error);
-      reject('Program Secure Charge Fail')
-    })
+const handleEnrollmentFee = (token, chargeDetails) => {
+  const {
+    fee,
+    receiptEmail,
+  } = chargeDetails
+
+  return stripe.customers.create({
+    email: receiptEmail,
+    source: token
   })
-}
+  .then(customer =>
+    stripe.charges.create({
+      amount: parseInt(fee) * 100,
+      description: 'Enrollment Fee Payment - One Heart Source',
+      currency: 'usd',
+      customer: customer.id,
+      receipt_email: receiptEmail,
+      metadata: chargeDetails,
+    }));
+};
 
 const handleClippersTicketPurchase = (token, orderDetails) => {
   const {
