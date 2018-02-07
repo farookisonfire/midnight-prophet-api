@@ -51,6 +51,10 @@ const findOneApplicant = (id, collection) => {
   return collection.findOne({_id: ObjectId(id)});
 }
 
+const findOneApplicantEmail = (email, collection) => {
+  return collection.findOne({ ['Email']: email });
+}
+
 function findOneProgram(programId, collection) {
   return new Promise((resolve, reject) => {
     collection.findOne({id:programId})
@@ -111,5 +115,6 @@ module.exports = {
   incrementProgramEnrollment,
   incrementProgramConfirmed,
   findOneAndAddProgramWaitlist,
-  decrementSectionTickets
+  decrementSectionTickets,
+  findOneApplicantEmail
 }
