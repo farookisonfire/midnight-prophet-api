@@ -40,7 +40,11 @@ const secureRoutes = (db) => {
       enrollmentFee = '',
       campaign = '',
     } = req.body;
-    const description = 'Enrollment Fee';
+
+    const chargeMetadata = {};
+    chargeMetadata.receiptEmail = email;
+    chargeMetadata.fee = enrollmentFee;
+
     const isValidId = validate.test(id);
     const enrollDate = moment().format('YYYY-MM-DD');
     const promotionDeadline = moment().add(10, 'days').format('YYYY-MM-DD');
@@ -48,7 +52,6 @@ const secureRoutes = (db) => {
 
     if (isValidId) {
       const applicantDetails = {};
-      const chargeMetadata = {};
 
       if(campaign) { // if enrollment is from a payment campaign, remove applicant from the automation list.
         const campaignListId = resolveCampaignListId(campaign);
@@ -75,7 +78,7 @@ const secureRoutes = (db) => {
         chargeMetadata.email = applicant['Email'];
         chargeMetadata.applicantPhone = applicant['Mobile Phone Number'];
       })
-      .then(() => handleEnrollmentFee(token, email, description, enrollmentFee, chargeMetadata))
+      .then(() => handleEnrollmentFee(token, chargeMetadata))
       .then((charge) => {
         const dbPayload = {
           status: 'confirmed',
