@@ -60,6 +60,13 @@ module.exports = function routes(db) {
     }
 
     const formResponse = mapAnswersToQuestions(typeformPayload);
+    
+    // CROSS-WORLD-MEDICS CATCH
+    if (formResponse['Which program are you most interested in?'] === 'Medical Internship') {
+      console.log('Redirected to CrossWorldMedics App...');
+      return res.status(200).send('Redirect to CWM App');
+    }
+    
     const applicantFirstName = formResponse['First Name']
     const applicantPhone = formResponse['Mobile Phone Number'];
     const messageToSend = userSubmitAppMsg(applicantFirstName);
