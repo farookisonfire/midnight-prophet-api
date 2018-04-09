@@ -49,7 +49,7 @@ const secureRoutes = (db) => {
     const enrollDate = moment().format('YYYY-MM-DD');
     const promotionDeadline = moment().add(10, 'days').format('YYYY-MM-DD');
     // const finalDeadline = moment().add(90, 'days').format('YYYY-MM-DD');
-    const finalDeadline = '2018-05-21';
+    const finalDeadline = '2018-05-14';
 
     if (isValidId) {
       const applicantDetails = {};
